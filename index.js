@@ -24,13 +24,11 @@ var parsesong = function(string) {
 
 var parseplaylist = function(string) {
   var rawdata = string.split("\n");
-  console.log(rawdata)
+  //console.log(rawdata)
   var playlist = [];
   var tmp_hash = {};
   for (var i = 0; i < rawdata.length; i++) {
-    if (rawdata[i].search("file") != -1) {
-      tmp_hash.file = rawdata[i].substr(6);
-    } else if (rawdata[i].search("Artist") != -1 && !rawdata[i].search("AlbumArtist")) {
+    if (rawdata[i].search("Artist") != -1 && !rawdata[i].search("AlbumArtist")) {
       tmp_hash.artist = rawdata[i].substr(13);
     } else if (rawdata[i].search("Title") != -1) {
       tmp_hash.title = rawdata[i].substr(7);
@@ -40,7 +38,7 @@ var parseplaylist = function(string) {
       tmp_hash = {};
     }
   }
-  console.log(playlist);
+  //console.log(playlist);
   return playlist
 }
 
@@ -64,6 +62,15 @@ app.get('/browse', function(req, res) {
   });
 });
 
+app.get('/browse/:artist', function(req, res) {
+  var artist = req.params.artist,
+  console.log("get \"/browse/" + artist + "\"");
+  mpdclient.sendCommand(cmd('list',['album', 'group', 'artist']), function(err, data) {
+    console.log(data);
+    //res.render('list_artists', {artists: artists});
+  });
+});
+
 app.get('/browse/:artist/:album', function(req, res) {
   var artist = req.params.artist,
       album = req.params.album;
@@ -72,10 +79,11 @@ app.get('/browse/:artist/:album', function(req, res) {
 });
 
 app.get('/playlist', function(req, res) {
+  console.log("get \"/playlist\"");
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
     if (err) throw err;
     var playlist = parseplaylist(data);
-    res.render('playlist', {playlist: playlist});
+    res.render('playlist', {song: song, playlist: playlist});
   });
 });
 
