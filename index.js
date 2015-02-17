@@ -22,6 +22,28 @@ var parsesong = function(string) {
   return [ title, artist, album ]
 }
 
+var parseplaylist = function(string) {
+  var rawdata = string.split("\n");
+  console.log(rawdata)
+  var playlist = [];
+  var tmp_hash = {};
+  for (var i = 0; i < rawdata.length; i++) {
+    if (rawdata[i].search("file") != -1) {
+      tmp_hash.file = rawdata[i].substr(6);
+    } else if (rawdata[i].search("Artist") != -1 && !rawdata[i].search("AlbumArtist")) {
+      tmp_hash.artist = rawdata[i].substr(13);
+    } else if (rawdata[i].search("Title") != -1) {
+      tmp_hash.title = rawdata[i].substr(7);
+    } else if (rawdata[i].search("Album") != -1) {
+      tmp_hash.album = rawdata[i].substr(7);
+      playlist.push(tmp_hash);
+      tmp_hash = {};
+    }
+  }
+  console.log(playlist);
+  return playlist
+}
+
 app.get('/', function(req, res) {
   console.log("get \"/\"");
   res.render('index', {
@@ -52,10 +74,7 @@ app.get('/browse/:artist/:album', function(req, res) {
 app.get('/playlist', function(req, res) {
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
     if (err) throw err;
-    var rawdata = data.split("\n");
-    for (var i = 0; i < rawdata.length; i++) {
-    }
-    console.log(playlist);
+    var playlist = parseplaylist(data);
     res.render('playlist', {playlist: playlist});
   });
 });
@@ -82,6 +101,7 @@ mpdclient.on('system-player', function() {
     if (err) throw err;
     var songdata = parsesong(data);
     song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
+    console.log("\tplaying: " + song.title + " - " + song.artist);
     votes = 0;
     io.emit('now_playing', song);
     io.emit('vote_tally', votes, true);
