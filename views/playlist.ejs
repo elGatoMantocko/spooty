@@ -1,0 +1,7 @@
+<ul class="list-group">
+  <% @queue.each do |song| %>
+    <% if @curr_song == song %><b><% end %>
+    <li class="list-group-item"><%= song.title %> - <%= song.artist %> - <%= song.album %></li>
+    <% if @curr_song == song %></b><% end %>
+  <% end %>
+</ul>

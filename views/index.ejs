@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" contents="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>CurateDJ</title>
+
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+    
+    <!-- Muses Radio Player -->
+    <script type="text/javascript" src="http://hosted.musesradioplayer.com/mrp.js"></script>
+
+    <!-- Custom Styles and Javascripts -->
+		<link rel="stylesheet" href="/css/main.css">
+		<link rel="stylesheet" href="/css/bootstrap-slider.min.css">
+		<script src="/js/bootstrap-slider.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+	  
+		<div class="container">
+			<div class="row title">
+				<div class="col-md-6">
+					<h1>Welcome to CurateDJ, <%= username %></h1><a href="{{ url_for('goodbye', username=username) }}">logout</a>
+				</div>
+				<div class="col-md-3">
+					<h4>
+					Progress
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="min-width: 30%;">
+							8:88-8:88
+						</div>
+					</div>
+					</h4>
+				</div>
+				<div class="col-md-3">
+					<h4>
+					Volume
+						<button onClick="toggleMute()" class="button btn-primary glyphicon glyphicon-volume-off"></button>
+						<input id="volume" data-slider-id='volumeSlider' type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="75" data-slider-tooltip="hide"/>
+					</h4>
+				</div>
+			</div>
+			<div class="row hidden-border">
+				<div class="col-md-12">
+					<h2 style="text-align: left;" >
+					  <span id='song_title'>
+              <% if (song != null) { %>
+                <%= song.title %> - <%= song.artist %>
+              <% } else { %>
+                There is nothing playing!
+              <% } %>
+            </span>
+					</h2>
+				</div>	
+			</div>
+			<div class="row">
+				<div class="col-md-6 text-center hidden-border" >
+					<div>
+						<h2>Vote!</h2>
+					</div>
+					<span id="upvote" class="glyphicon glyphicon-arrow-up" style="font-size: 150px; padding-right: 9px; cursor:pointer;" onClick="upvote()"></span>
+					<span id="already_upvoted" class="glyphicon glyphicon-arrow-up" style="color:green; display:none; font-size: 150px; padding-right: 9px; cursor:pointer;" onClick="upvote()"></span>
+					<div>
+						<span id="vote_tally" style="font-size: 100px;"><%= vote_tally %></span>	
+					</div>
+					<span id="downvote" class="glyphicon glyphicon-arrow-down" style="font-size: 150px; padding-left: 14px; cursor:pointer;" onClick="downvote()"></span>
+					<span id="already_downvoted" class="glyphicon glyphicon-arrow-down" style="color:red; display:none; font-size: 150px; padding-left: 14px; cursor:pointer;" onClick="downvote()"></span>
+
+				</div>
+				<div class="col-md-6 hidden-border">
+					<div>
+						<h2>Queue  <button  class="btn btn-primary" style="float: right;" data-toggle="modal" data-target="#myModal" onClick="load_artist_list()">Browse</button></h2>
+					</div>
+
+				<!-- Modal -->
+				<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  				<div class="modal-dialog">
+    				<div class="modal-content">
+      				<div class="modal-header">
+        				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        				<h4 class="modal-title" id="myModalLabel">Browse</h4>
+      			  </div>
+      				<div class="modal-body">
+	  				    <div id="browser">
+					      </div>
+      				</div>
+      				<div class="modal-footer">
+        				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      				</div>
+    				</div>
+  				</div>
+				</div>
+
+				<div id="playlist"></div>
+				</div>
+			</div>
+
+
+
+<div style="visibility:hidden">
+<!-- BEGINS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+<script type="text/javascript">
+MRP.insert({
+'url':'http://192.168.2.30:8000/mpd',
+'codec':'mp3',
+'volume':75,
+'autoplay':true,
+'buffering':5,
+'title':'CurateDJ',
+'bgcolor':'#FFFFFF',
+'skin':'mcclean',
+'width':180,
+'height':60
+});
+</script>
+<!-- ENDS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+</div>
+
+<script type="text/javascript">
+  var socket = io();
+  var voted = false;
+  var dirty_hack_flag = true;
+
+  var song_title = document.getElementById('song_title');
+  var vote_tally = document.getElementById('vote_tally');
+  var playlist_div = document.getElementById('playlist');
+  var browser_div = document.getElementById('browser');
+
+  function reload_playlist() {
+    $.get("/playlist", function(data, status) {
+  		playlist_div.innerHTML = data;
+    });
+  }
+
+  function load_artist_list() {
+    $.get("/browse", function(data, status) {
+      //alert(data);
+      browser_div.innerHTML = data;
+    });
+  }
+
+  function load_album_list(artist) {
+    uri = encodeURI("/browse/" + artist);
+    $.get(uri, function(data,status) {
+      browser_div.innerHTML = data;
+    });
+  }
+
+  function load_song_list(artist, album) {
+    uri = encodeURI("/browse/" + artist + "/" + album);
+    $.get(uri, function(data,status) {
+      browser_div.innerHTML = data;
+    });
+  }
+
+  /*
+  function enqueue(path) {
+    var u = "<%= username %>";
+    var browser_div = document.getElementById('browser');
+    var song_title = document.getElementById('song_title');
+    uri = encodeURI("/add/" + path)
+    $.post(uri,{username:u},function(data,status) {
+      if (dirty_hack_flag = true) {
+        song_title.innerHTML = data;
+        dirty_hack_flag = false;
+      }
+    });
+    $.get(uri,null);
+    browser_div.innerHTML = load_artist_list();
+    
+    reload_playlist();    
+  }
+  */
+  
+  function monitor_now_playing() {
+    reload_playlist();
+    socket.on('now_playing', function(song) {
+      song_title.innerHTML = song.title + " - " + song.artist
+    });
+    
+    socket.on('vote_tally', function(votes, reset_flag) {
+      vote_tally.innerHTML = votes;
+      if (reset_flag) {
+        reset_vote_buttons();
+      }
+    });
+  }
+
+  var lastVolumeLevel = 0;
+  function toggleMute() {
+	  console.log('mute toggle');
+	  var currentVolume = $('#volume').slider().data('slider').value[0];
+	  if (currentVolume != 0) {
+		  lastVolumeLevel = currentVolume;
+		  $('#volume').slider().data('slider').setValue(0);
+		  MRP.setVolume(0)
+	  } else {
+		  $('#volume').slider().data('slider').setValue(lastVolumeLevel);
+		  MRP.setVolume(lastVolumeLevel);
+	  }
+  }
+
+  function upvote() {
+    if (!voted) {
+      $.get("/upvote", null);
+      $("#upvote").hide();
+      $("#downvote").hide();
+      $("#already_upvoted").show();
+      voted = true;
+    }
+  }
+
+  function downvote() {
+    if (!voted) {
+      $.get("/downvote", null);
+      $("#upvote").hide();
+      $("#downvote").hide();
+      $("#already_downvoted").show();
+      voted = true;
+    }  
+  }
+  
+  function reset_vote_buttons() {
+    $("#already_upvoted").hide();
+    $("#already_downvoted").hide();
+    $("#downvote").show();
+    $("#upvote").show();
+    voted = false;
+  }
+
+  $(document).ready(monitor_now_playing())
+
+</script>
+
+	</body>
+</html>
