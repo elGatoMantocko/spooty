@@ -1,0 +1,12 @@
+<h2>Albums by <%= artist %></h2>
+<% for (var i = 0; i < albums.length; i++) { %>
+  <a href="#" onClick="load_song_list('<%= artist %>','<%= albums[i] %>')"><%= albums[i] %></a>
+<br/>
+<% } %>
+
+<% if (other.length > 0) { %>
+<h3>Songs by <%= artist %> with unknown album</h3>
+  <% for (var i = 0; i < other.length; i++) { %>
+    <a href="{{ url_for('add', filepath=song.file) }}"><%= other[i].title %></a><br/>
+  <% } %>
+<% } %>

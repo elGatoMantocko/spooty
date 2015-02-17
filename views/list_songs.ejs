@@ -1,0 +1,5 @@
+<h2>Songs in album <%= album %></h2>
+<% for (var i = 0; i < songs.length; i++) { %>
+  <a href="#" onClick="enqueue('<%=songs[i].file%>')"><%= songs[i].artist %> - <%= songs[i].title %></a>
+<br/>
+<% } %>
