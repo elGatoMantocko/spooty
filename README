@@ -1,5 +1,6 @@
-curatedj is a collaborative music listening experience
+spooty is a collaborative music listening experience
 
-With curatedj, users may listen and collaborate with homemade radio stations
+With spooty, users may listen and collaborate with homemade radio stations
 
-This version of curatedj is built using MPD, Icecast2, and Node (express)
+This version of spooty is built using MPD, Icecast2, and Node (express)
+Spooty is a node port of elGatoMantocko/curate.dj (http://github.com/elGatoMantocko/curate.dj)
