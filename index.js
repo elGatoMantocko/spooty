@@ -65,9 +65,13 @@ app.get('/browse', function(req, res) {
 app.get('/browse/:artist', function(req, res) {
   var artist = req.params.artist;
   console.log("get \"/browse/" + artist + "\"");
-  mpdclient.sendCommand(cmd('list',['album', 'group', 'artist']), function(err, data) {
-    console.log(data);
-    //res.render('list_artists', {artists: artists});
+  mpdclient.sendCommand(cmd('list',['album', artist]), function(err, data) {
+    var albums = data.split("\n");
+    for (var i = 0; i < albums.length; i++) {
+      albums[i] = albums[i].substr(7);
+    }
+    //console.log(albums);
+    res.render('list_albums', {artist: artist, albums: albums, other: []});
   });
 });
 
@@ -75,7 +79,24 @@ app.get('/browse/:artist/:album', function(req, res) {
   var artist = req.params.artist,
       album = req.params.album;
   console.log("get \"/browse/" + artist + "/" + album + "\""); 
-  //console.log("artist: " + artist + "\nalbum: " + album);
+  mpdclient.sendCommand(cmd('find',['album', album]), function(err, data) {
+    var rawdata = data.split("\n");
+    //console.log(rawdata);
+
+    var songs = [];
+    var tmp_hash = {};
+    for (var i = 0; i < rawdata.length; i++) {
+      if (rawdata[i].search("file") != -1) {
+        tmp_hash.file = rawdata[i].substr(6);
+      } else if (rawdata[i].search("Title") != -1) {
+        tmp_hash.title = rawdata[i].substr(7);
+        songs.push(tmp_hash);
+        tmp_hash = {};
+      }
+    }
+    //console.log(songs);
+    res.render('list_songs', {songs: songs, artist: artist, album: album});
+  });
 });
 
 app.get('/playlist', function(req, res) {

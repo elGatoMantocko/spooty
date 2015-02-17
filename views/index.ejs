@@ -7,10 +7,10 @@
 		<title>CurateDJ</title>
 
 		<!-- Bootstrap -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
     
     <!-- Muses Radio Player -->
     <script type="text/javascript" src="http://hosted.musesradioplayer.com/mrp.js"></script>
@@ -187,8 +187,8 @@ MRP.insert({
   */
   
   function monitor_now_playing() {
-    reload_playlist();
     socket.on('now_playing', function(song) {
+      reload_playlist();
       song_title.innerHTML = song.title + " - " + song.artist
     });
     
