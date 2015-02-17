@@ -1,0 +1,5 @@
+curatedj is a collaborative music listening experience
+
+With curatedj, users may listen and collaborate with homemade radio stations
+
+This version of curatedj is built using MPD, Icecast2, and Node (express)
