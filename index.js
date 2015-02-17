@@ -99,6 +99,14 @@ app.get('/browse/:artist/:album', function(req, res) {
   });
 });
 
+app.post('/add/:filepath', function(req, res) {
+  var filepath = req.params.filepath;
+  console.log("post \"/add/" + filepath); 
+  mpdclient.sendCommand(cmd('add',[filepath]), function(err, data) {
+    console.log(data);
+  });
+});
+
 app.get('/playlist', function(req, res) {
   console.log("get \"/playlist\"");
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
