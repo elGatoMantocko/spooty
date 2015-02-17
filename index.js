@@ -63,7 +63,7 @@ app.get('/browse', function(req, res) {
 });
 
 app.get('/browse/:artist', function(req, res) {
-  var artist = req.params.artist,
+  var artist = req.params.artist;
   console.log("get \"/browse/" + artist + "\"");
   mpdclient.sendCommand(cmd('list',['album', 'group', 'artist']), function(err, data) {
     console.log(data);
