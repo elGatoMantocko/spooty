@@ -187,6 +187,8 @@ MRP.insert({
   */
   
   function monitor_now_playing() {
+    reload_playlist();
+
     socket.on('now_playing', function(song) {
       reload_playlist();
       song_title.innerHTML = song.title + " - " + song.artist

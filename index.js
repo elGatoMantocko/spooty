@@ -44,11 +44,18 @@ var parseplaylist = function(string) {
 
 app.get('/', function(req, res) {
   console.log("get \"/\"");
-  res.render('index', {
-    song: song,
-    vote_tally: votes,
-    username: "Elliott"
+
+  mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
+    if (err) throw err;
+    var songdata = parsesong(data);
+    song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
+    res.render('index', {
+      song: song,
+      vote_tally: votes,
+      username: "Elliott"
+    });
   });
+
 });
 
 app.get('/browse', function(req, res) {
