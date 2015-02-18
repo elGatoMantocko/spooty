@@ -133,6 +133,13 @@ app.get('/downvote', function(req, res) {
   io.emit('vote_tally', votes, false);
 });
 
+setTimeout(function() {
+  mpdclient.sendCommand('status', []),
+  var position
+  //console.log(position);
+  io.emit('position', position)
+}, 1000);
+
 mpdclient.on('system-player', function() {
   mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
     if (err) throw err;
