@@ -106,6 +106,14 @@ app.get('/browse/:artist/:album', function(req, res) {
   });
 });
 
+app.post('/add/:filepath', function(req, res) {
+  var filepath = req.params.filepath;
+  console.log("post \"/add/" + filepath); 
+  mpdclient.sendCommand(cmd('add',[filepath]), function(err, data) {
+    console.log(data);
+  });
+});
+
 app.get('/playlist', function(req, res) {
   console.log("get \"/playlist\"");
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
@@ -132,6 +140,15 @@ app.get('/downvote', function(req, res) {
   io.emit('vote_tally', votes, false);
 });
 
+/*
+setTimeout(function() {
+  mpdclient.sendCommand('status', []);
+  var position;
+  //console.log(position);
+  io.emit('position', position)
+}, 1000);
+*/
+
 mpdclient.on('system-player', function() {
   mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
     if (err) throw err;
@@ -139,6 +156,7 @@ mpdclient.on('system-player', function() {
     song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
     console.log("\tplaying: " + song.title + " - " + song.artist);
     votes = 0;
+    io.emit('reload_playlist');
     io.emit('now_playing', song);
     io.emit('vote_tally', votes, true);
   });
