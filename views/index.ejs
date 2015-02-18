@@ -183,11 +183,10 @@ MRP.insert({
   }
   
   function monitor_now_playing() {
-    socket.on('reload_playlist', function() {
-      reload_playlist();
-    });
+    reload_playlist();
 
     socket.on('now_playing', function(song) {
+      reload_playlist();
       song_title.innerHTML = song.title + " - " + song.artist
     });
 
