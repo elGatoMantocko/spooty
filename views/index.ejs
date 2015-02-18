@@ -183,10 +183,20 @@ MRP.insert({
   }
   
   function monitor_now_playing() {
-    reload_playlist();
-    socket.on('now_playing', function(song) {
+    socket.on('reload_playlist', function() {
       reload_playlist();
+    });
+
+    socket.on('now_playing', function(song) {
       song_title.innerHTML = song.title + " - " + song.artist
+    });
+
+    socket.on('position', function(position) {
+      $('.progress-bar')[0].innerHTML = position.time;
+      var percentage = position.percentage;
+      percentage = percentage.replace('(', '');
+      percentage = percentage.replace(')', '');
+      $('.progress-bar')[0].style.width = percentage;
     });
     
     socket.on('vote_tally', function(votes, reset_flag) {
@@ -194,6 +204,10 @@ MRP.insert({
       if (reset_flag) {
         reset_vote_buttons();
       }
+    });
+
+    $('#volume').slider().on('slide', function() {
+      MRP.setVolume($('#volume').slider().data('slider').value[0]);
     });
   }
 

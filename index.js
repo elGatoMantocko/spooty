@@ -140,6 +140,7 @@ mpdclient.on('system-player', function() {
     song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
     console.log("\tplaying: " + song.title + " - " + song.artist);
     votes = 0;
+    io.emit('reload_playlist');
     io.emit('now_playing', song);
     io.emit('vote_tally', votes, true);
   });
