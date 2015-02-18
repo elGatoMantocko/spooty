@@ -45,6 +45,7 @@ var parseplaylist = function(string) {
 app.get('/', function(req, res) {
   console.log("get \"/\"");
 
+  /*
   mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
     if (err) throw err;
     var songdata = parsesong(data);
@@ -55,9 +56,15 @@ app.get('/', function(req, res) {
       username: "Elliott"
     });
   });
-
+  */
+  res.render('index', {
+    song: song,
+    vote_tally: votes,
+    username: "Elliott"
+  });
 });
 
+// Show a list of the artists
 app.get('/browse', function(req, res) {
   console.log("get \"/browse\"");
   mpdclient.sendCommand(cmd('list',['artist']), function(err, data) {
@@ -69,6 +76,7 @@ app.get('/browse', function(req, res) {
   });
 });
 
+// Show a list of albums (and songs outside album directories) by :artist
 app.get('/browse/:artist', function(req, res) {
   var artist = req.params.artist;
   console.log("get \"/browse/" + artist + "\"");
@@ -77,18 +85,18 @@ app.get('/browse/:artist', function(req, res) {
     for (var i = 0; i < albums.length; i++) {
       albums[i] = albums[i].substr(7);
     }
-    //console.log(albums);
+    // TODO: show songs outside of album directories
     res.render('list_albums', {artist: artist, albums: albums, other: []});
   });
 });
 
+// Show songs by :artist on :album
 app.get('/browse/:artist/:album', function(req, res) {
   var artist = req.params.artist,
       album = req.params.album;
   console.log("get \"/browse/" + artist + "/" + album + "\""); 
   mpdclient.sendCommand(cmd('find',['album', album]), function(err, data) {
     var rawdata = data.split("\n");
-    //console.log(rawdata);
 
     var songs = [];
     var tmp_hash = {};
@@ -101,7 +109,6 @@ app.get('/browse/:artist/:album', function(req, res) {
         tmp_hash = {};
       }
     }
-    //console.log(songs);
     res.render('list_songs', {songs: songs, artist: artist, album: album});
   });
 });
@@ -114,6 +121,7 @@ app.post('/add/:filepath', function(req, res) {
   });
 });
 
+// Get and parse the playlist info
 app.get('/playlist', function(req, res) {
   console.log("get \"/playlist\"");
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
@@ -140,15 +148,30 @@ app.get('/downvote', function(req, res) {
   io.emit('vote_tally', votes, false);
 });
 
-/*
-setTimeout(function() {
-  mpdclient.sendCommand('status', []);
-  var position;
-  //console.log(position);
-  io.emit('position', position)
-}, 1000);
-*/
+// Send the position to the client every second
+var timerId = setInterval(function() {
+  mpdclient.sendCommand(cmd('status', []), function(err, statusdata) {
+    mpdclient.sendCommand(cmd('currentsong', []), function(err, songdata) {
+      // handle current song
+      var current_song = parsesong(songdata);
+      song = { title: current_song[0], artist: current_song[1], album: current_song[2] };
 
+      // handle current position
+      var pos = Math.round(statusdata.match(/elapsed: [0-9]*\.[0-9]*/g)[0].substr(9));
+      var songlength = parseInt(songdata.match(/Time: [0-9]*/g)[0].substr(6));
+      var time = Math.floor(pos/60) + ":" + pos%60 + "-" + Math.floor(songlength/60) + ":" + songlength%60;
+      var pct = Math.round(pos/songlength*100).toString() + '%';
+
+      //console.log(time);
+
+      var position = {time: time, percentage: pct};
+      io.emit('position', position)
+    });
+  });
+}, 1000);
+
+// Update the song title, playlist, and vote
+//  tally whenever the song changes
 mpdclient.on('system-player', function() {
   mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
     if (err) throw err;
@@ -156,7 +179,6 @@ mpdclient.on('system-player', function() {
     song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
     console.log("\tplaying: " + song.title + " - " + song.artist);
     votes = 0;
-    io.emit('reload_playlist');
     io.emit('now_playing', song);
     io.emit('vote_tally', votes, true);
   });
