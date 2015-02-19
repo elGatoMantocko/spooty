@@ -16,14 +16,15 @@ var votes = 0;
 var parsesong = function(string) {
   return { 
     title: string.match(/Title: \w.*/g)[0].substr(7), 
-    artist: string.match(/Artist: \w.*/g)[0].substr(8), 
+    artist: string.match(/\bArtist: \w.*/g)[0].substr(8), 
     album: string.match(/Album: \w.*/g)[0].substr(7)
   }
 }
 
 var parseplaylist = function(string) {
+  //console.log(string);
   var titles = string.match(/Title: \w.*/g);
-  var artists = string.match(/Artist: \w.*/g);
+  var artists = string.match(/\bArtist: \w.*/g);
   var albums = string.match(/Album: \w.*/g);
 
   var playlist = [];
@@ -34,7 +35,7 @@ var parseplaylist = function(string) {
       album: albums[i].substr(7)
     });
   }
-  console.log(playlist);
+  //console.log(playlist);
   return playlist
 }
 
