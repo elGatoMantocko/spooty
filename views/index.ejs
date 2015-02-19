@@ -239,6 +239,12 @@ MRP.insert({
       voted = true;
     }  
   }
+
+  function deleteSong(song) {
+    var uri = encodeURI("/delete/" + song);
+    $.get(uri, null);
+    reload_playlist();
+  }
   
   function reset_vote_buttons() {
     $("#already_upvoted").hide();
