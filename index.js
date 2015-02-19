@@ -14,49 +14,33 @@ var song = null;
 var votes = 0;
 
 var parsesong = function(string) {
-  var splitdata = string.split("\n");
-  var artist = splitdata[3].substr(8);
-  var title = splitdata[5].substr(7);
-  var album = splitdata[6].substr(7);
-
-  return [ title, artist, album ]
+  return { 
+    title: string.match(/Title: \w.*/g)[0].substr(7), 
+    artist: string.match(/Artist: \w.*/g)[0].substr(8), 
+    album: string.match(/Album: \w.*/g)[0].substr(7)
+  }
 }
 
 var parseplaylist = function(string) {
-  var rawdata = string.split("\n");
-  //console.log(rawdata)
+  var titles = string.match(/Title: \w.*/g);
+  var artists = string.match(/Artist: \w.*/g);
+  var albums = string.match(/Album: \w.*/g);
+
   var playlist = [];
-  var tmp_hash = {};
-  for (var i = 0; i < rawdata.length; i++) {
-    if (rawdata[i].search("Artist") != -1 && !rawdata[i].search("AlbumArtist")) {
-      tmp_hash.artist = rawdata[i].substr(13);
-    } else if (rawdata[i].search("Title") != -1) {
-      tmp_hash.title = rawdata[i].substr(7);
-    } else if (rawdata[i].search("Album") != -1) {
-      tmp_hash.album = rawdata[i].substr(7);
-      playlist.push(tmp_hash);
-      tmp_hash = {};
-    }
+  for (var i = 0; i < titles.length; i++) {
+    playlist.push({ 
+      title: titles[i].substr(7),
+      artist: artists[i].substr(8), 
+      album: albums[i].substr(7)
+    });
   }
-  //console.log(playlist);
+  console.log(playlist);
   return playlist
 }
 
 app.get('/', function(req, res) {
   console.log("get \"/\"");
 
-  /*
-  mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
-    if (err) throw err;
-    var songdata = parsesong(data);
-    song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
-    res.render('index', {
-      song: song,
-      vote_tally: votes,
-      username: "Elliott"
-    });
-  });
-  */
   res.render('index', {
     song: song,
     vote_tally: votes,
@@ -96,19 +80,18 @@ app.get('/browse/:artist/:album', function(req, res) {
       album = req.params.album;
   console.log("get \"/browse/" + artist + "/" + album + "\""); 
   mpdclient.sendCommand(cmd('find',['album', album]), function(err, data) {
-    var rawdata = data.split("\n");
+    //console.log(data);
+    var files = data.match(/file: \w.*/g);
+    var titles = data.match(/Title: \w.*/g);
 
     var songs = [];
-    var tmp_hash = {};
-    for (var i = 0; i < rawdata.length; i++) {
-      if (rawdata[i].search("file") != -1) {
-        tmp_hash.file = rawdata[i].substr(6);
-      } else if (rawdata[i].search("Title") != -1) {
-        tmp_hash.title = rawdata[i].substr(7);
-        songs.push(tmp_hash);
-        tmp_hash = {};
-      }
+    for (var i = 0; i < titles.length; i++) {
+      songs.push({
+        file: files[i].substr(6),
+        title: titles[i].substr(7)
+      });
     }
+
     res.render('list_songs', {songs: songs, artist: artist, album: album});
   });
 });
@@ -153,8 +136,7 @@ var timerId = setInterval(function() {
   mpdclient.sendCommand(cmd('status', []), function(err, statusdata) {
     mpdclient.sendCommand(cmd('currentsong', []), function(err, songdata) {
       // handle current song
-      var current_song = parsesong(songdata);
-      song = { title: current_song[0], artist: current_song[1], album: current_song[2] };
+      song = parsesong(songdata);
 
       // handle current position
       var pos = Math.round(statusdata.match(/elapsed: [0-9]*\.[0-9]*/g)[0].substr(9));
@@ -170,13 +152,12 @@ var timerId = setInterval(function() {
   });
 }, 1000);
 
-// Update the song title, playlist, and vote
-//  tally whenever the song changes
+// Update the song title, playlist, and vote tally whenever the song changes
 mpdclient.on('system-player', function() {
   mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
     if (err) throw err;
-    var songdata = parsesong(data);
-    song = { title: songdata[0], artist: songdata[1], album: songdata[2] };
+    song = parsesong(data);
+
     console.log("\tplaying: " + song.title + " - " + song.artist);
     votes = 0;
     io.emit('now_playing', song);
