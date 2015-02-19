@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
+var path = require('path');
 var favicon = require('serve-favicon');
 var io = require('socket.io')(http);
 var mpd = require('mpd');
@@ -8,7 +9,7 @@ var cmd = mpd.cmd;
 var mpdclient = mpd.connect({ port: 6600, host: 'localhost' });
 
 app.set('view engine', 'ejs');
-app.use(favicon(__dirname + '/public/images/favicon.ico'));
+app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(express.static(__dirname + '/public'));
 
 var population = 0;
