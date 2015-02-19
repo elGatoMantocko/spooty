@@ -120,11 +120,6 @@ app.post('/add/*', function(req, res) {
 app.get('/add/*', function(req, res) {
   var filepath = req.params[0];
   console.log("get \"/add/" + filepath); 
-  /*
-  mpdclient.sendCommand(cmd('add',[filepath]), function(err, data) {
-    //console.log(data);
-  });
-  */
 });
 
 // Get and parse the playlist info
