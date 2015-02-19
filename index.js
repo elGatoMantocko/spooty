@@ -122,6 +122,14 @@ app.get('/add/*', function(req, res) {
   console.log("get \"/add/" + filepath); 
 });
 
+app.get('/delete/:pos', function(req, res) {
+  var pos = req.params.pos;
+  console.log("get \"/delete/" + pos); 
+  mpdclient.sendCommand(cmd('delete',[pos]), function(err, data) {
+    if (err) throw err;
+  });
+});
+
 // Get and parse the playlist info
 app.get('/playlist', function(req, res) {
   console.log("get \"/playlist\"");
