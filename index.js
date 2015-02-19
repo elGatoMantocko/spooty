@@ -139,13 +139,17 @@ var timerId = setInterval(function() {
       // handle current song
       song = parsesong(songdata);
 
-      // handle current position
-      var pos = Math.round(statusdata.match(/elapsed: [0-9]*\.[0-9]*/g)[0].substr(9));
+      // determine padding for seconds less than 10 (ex. time "1:01")
+      var pos = Math.round(statusdata.match(/time: [0-9]*/g)[0].substr(6));
       var songlength = parseInt(songdata.match(/Time: [0-9]*/g)[0].substr(6));
-      var time = Math.floor(pos/60) + ":" + pos%60 + "-" + Math.floor(songlength/60) + ":" + songlength%60;
-      var pct = Math.round(pos/songlength*100).toString() + '%';
+      var songsecs = songlength % 60;
+      var possecs = pos % 60;
+      if (songlength%60 < 10) { songsecs = "0" + songsecs };
+      if (pos%60 < 10) { possecs = "0" + possecs };
 
-      //console.log(time);
+      // handle current position
+      var time = Math.floor(pos/60) + ":" + possecs + "-" + Math.floor(songlength/60) + ":" + songsecs;
+      var pct = Math.round(pos/songlength*100).toString() + '%';
 
       var position = {time: time, percentage: pct};
       io.emit('position', position)
