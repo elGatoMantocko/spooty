@@ -140,6 +140,8 @@ MRP.insert({
   var playlist_div = document.getElementById('playlist');
   var browser_div = document.getElementById('browser');
 
+  reload_playlist();
+
   function reload_playlist() {
     $.get("/playlist", function(data, status) {
   		playlist_div.innerHTML = data;
@@ -169,8 +171,9 @@ MRP.insert({
 
   function enqueue(path) {
     var u = "<%= username %>";
-    uri = encodeURI("/add/" + path)
+    uri = encodeURI("/add/" + path);
     $.post(uri,{username:u},function(data,status) {
+      console.log(data);
       if (dirty_hack_flag == true) {
         song_title.innerHTML = data;
         dirty_hack_flag = false;
@@ -183,26 +186,20 @@ MRP.insert({
   }
   
   function monitor_now_playing() {
-    reload_playlist();
-
     socket.on('now_playing', function(song) {
       reload_playlist();
+      reset_vote_buttons();
       song_title.innerHTML = song.title + " - " + song.artist
     });
 
     socket.on('position', function(position) {
       $('.progress-bar')[0].innerHTML = position.time;
       var percentage = position.percentage;
-      //percentage = percentage.replace('(', '');
-      //percentage = percentage.replace(')', '');
       $('.progress-bar')[0].style.width = percentage;
     });
     
-    socket.on('vote_tally', function(votes, reset_flag) {
+    socket.on('vote_tally', function(votes) {
       vote_tally.innerHTML = votes;
-      if (reset_flag) {
-        reset_vote_buttons();
-      }
     });
 
     $('#volume').slider().on('slide', function() {

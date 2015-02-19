@@ -1,7 +1,7 @@
 <ul class="list-group">
   <% for (var i = 0; i < playlist.length; i++) { %>
-    <% if (song && song.title == playlist[i].title && song.artist == playlist[i].artist) { %><b><% } %>
-    <li class="list-group-item"><%= playlist[i].title %> - <%= playlist[i].artist %> - <%= playlist[i].album %></li>
-    <% if (song && song.title == playlist[i].title && song.artist == playlist[i].artist) { %></b><% } %>
+    <% if (song && song.pos == playlist[i].pos) { %><b><% } %>
+    <li class="list-group-item"><%= parseInt(playlist[i].pos) + 1 %>: <%= playlist[i].title %> - <%= playlist[i].artist %> - <%= playlist[i].album %></li>
+    <% if (song && song.pos == playlist[i].pos) { %></b><% } %>
   <% } %>
 </ul>
