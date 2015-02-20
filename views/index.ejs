@@ -188,7 +188,11 @@ MRP.insert({
     socket.on('now_playing', function(song) {
       reload_playlist();
       reset_vote_buttons();
-      song_title.innerHTML = song.title + " - " + song.artist
+      if (song) {
+        song_title.innerHTML = song.title + " - " + song.artist;
+      } else {
+        song_title.innerHTML = "There is nothing playing!";
+      }
     });
 
     socket.on('position', function(position) {
@@ -251,6 +255,7 @@ MRP.insert({
     $("#already_downvoted").hide();
     $("#downvote").show();
     $("#upvote").show();
+    vote_tally.innerHTML = 0;
     voted = false;
   }
 
