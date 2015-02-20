@@ -2,12 +2,15 @@
   "name": "curate.dj",
   "version": "0.0.1",
   "description": "collaberative music listening",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/elGatoMantocko/spooty.git"
+  },
   "dependencies": {
-    "express": "~4.10.2",
+    "express": "~4.10.8",
     "socket.io": "~1.3.4",
     "ejs": "~2.2.4",
     "mpd": "~1.2.0",
-    //"twitter-bootstrap-node": "~0.1.2",
     "bootstrap": "~3.3.2",
     "serve-favicon": "~2.2.0"
   }
