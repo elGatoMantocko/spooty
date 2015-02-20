@@ -207,8 +207,8 @@ mpdclient.on('system', function(name) {
   } else if (name === "playlist") {
     mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
       if (err) throw err;
-      if (data != "") {
-        mpdclient.sendCommand(cmd('play', [0]), function(err, data) {
+      if (parseplaylist(data).length > 0) {
+        mpdclient.sendCommand(cmd('play', []), function(err, data) {
           if (err) throw err;
         });
       }
