@@ -186,14 +186,16 @@ MRP.insert({
 
     socket.on('now_playing', function(song) {
       reload_playlist();
-      song_title.innerHTML = song.title + " - " + song.artist
+      if (song) {
+        song_title.innerHTML = song.title + " - " + song.artist;
+      } else {
+        song_title.innerHTML = "There is nothing playing!";
+      }
     });
 
     socket.on('position', function(position) {
       $('.progress-bar')[0].innerHTML = position.time;
       var percentage = position.percentage;
-      //percentage = percentage.replace('(', '');
-      //percentage = percentage.replace(')', '');
       $('.progress-bar')[0].style.width = percentage;
     });
     
@@ -254,6 +256,7 @@ MRP.insert({
     $("#already_downvoted").hide();
     $("#downvote").show();
     $("#upvote").show();
+    vote_tally.innerHTML = 0;
     voted = false;
   }
 

@@ -20,11 +20,15 @@ var votes = 0;
 // This function can be altared to return more or less information about the song
 var parsesong = function(string) {
   //console.log(string);
-  return { 
-    title: string.match(/Title: \w.*/g)[0].substr(7), 
-    artist: string.match(/\bArtist: \w.*/g)[0].substr(8), 
-    album: string.match(/Album: \w.*/g)[0].substr(7),
-    pos: string.match(/Pos: \w.*/g)[0].substr(5)
+  if (string === "") {
+    return null;
+  } else {
+    return { 
+      title: string.match(/Title: \w.*/g)[0].substr(7), 
+      artist: string.match(/\bArtist: \w.*/g)[0].substr(8), 
+      album: string.match(/Album: \w.*/g)[0].substr(7),
+      pos: string.match(/Pos: \w.*/g)[0].substr(5)
+    }
   }
 }
 
@@ -32,7 +36,7 @@ var parsesong = function(string) {
 // This function can be altared to return more or less information about each song
 var parseplaylist = function(string) {
   //console.log(string);
-  var titles = string.match(/Title: \w.*/g);
+  var titles = string.match(/Title: \w.*/g) || [];
   var artists = string.match(/\bArtist: \w.*/g);
   var albums = string.match(/Album: \w.*/g);
   var positions = string.match(/Pos: \w.*/g);
@@ -95,7 +99,7 @@ app.get('/browse/:artist/:album', function(req, res) {
   mpdclient.sendCommand(cmd('find',['album', album]), function(err, data) {
     //console.log(data);
     var files = data.match(/file: \w.*/g);
-    var titles = data.match(/Title: \w.*/g);
+    var titles = data.match(/Title: \w.*/g) || [];
 
     var songs = [];
     for (var i = 0; i < titles.length; i++) {
@@ -164,6 +168,9 @@ var timerId = setInterval(function() {
     mpdclient.sendCommand(cmd('currentsong', []), function(err, songdata) {
       // handle current song
       song = parsesong(songdata);
+      if (!song) {
+        return;
+      }
 
       // parse statusdata
       var pos = Math.round(statusdata.match(/time: [0-9]*/g)[0].substr(6));
@@ -186,16 +193,27 @@ var timerId = setInterval(function() {
 }, 1000);
 
 // Update the song title, playlist, and vote tally whenever the song changes
-mpdclient.on('system-player', function() {
-  mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
-    if (err) throw err;
-    song = parsesong(data);
-
-    console.log("\tplaying: " + song.title + " - " + song.artist);
-    votes = 0;
-    io.emit('now_playing', song);
-    io.emit('vote_tally', votes);
-  });
+mpdclient.on('system', function(name) {
+  if (name === "player") {
+    mpdclient.sendCommand(cmd('currentsong', []), function(err, data) {
+      if (err) throw err;
+      song = parsesong(data);
+      if (song) {
+        console.log("\tplaying: " + song.title + " - " + song.artist);
+      }
+      votes = 0;
+      io.emit('now_playing', song);
+    });
+  } else if (name === "playlist") {
+    mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
+      if (err) throw err;
+      if (data != "") {
+        mpdclient.sendCommand(cmd('play', [0]), function(err, data) {
+          if (err) throw err;
+        });
+      }
+    });
+  }
 });
 
 // maintain the population listening in here
