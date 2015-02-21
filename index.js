@@ -23,11 +23,15 @@ var parsesong = function(string) {
   if (string === "") {
     return null;
   } else {
+    var title = string.match(/Title: \w.*/g) || ["Title: TITLE_NOT_FOUND"];
+    var artist = string.match(/\bArtist: \w.*/g) || ["Artist: "];
+    var album = string.match(/Album: \w.*/g) || ["Album: "];
+    var pos = string.match(/Pos: \w.*/g) || ["Pos: "];
     return { 
-      title: string.match(/Title: \w.*/g)[0].substr(7), 
-      artist: string.match(/\bArtist: \w.*/g)[0].substr(8), 
-      album: string.match(/Album: \w.*/g)[0].substr(7),
-      pos: string.match(/Pos: \w.*/g)[0].substr(5)
+      title: title[0].substr(7), 
+      artist: artist[0].substr(8), 
+      album: album[0].substr(7), 
+      pos: pos[0].substr(5), 
     }
   }
 }
@@ -35,21 +39,12 @@ var parsesong = function(string) {
 // Return information about each song in the playlist
 // This function can be altared to return more or less information about each song
 var parseplaylist = function(string) {
-  //console.log(string);
-  var titles = string.match(/Title: \w.*/g) || [];
-  var artists = string.match(/\bArtist: \w.*/g);
-  var albums = string.match(/Album: \w.*/g);
-  var positions = string.match(/Pos: \w.*/g);
-
-  var playlist = [];
-  for (var i = 0; i < titles.length; i++) {
-    playlist.push({ 
-      title: titles[i].substr(7),
-      artist: artists[i].substr(8), 
-      album: albums[i].substr(7),
-      pos: positions[i].substr(5)
-    });
+  // match all content between file: and Id: in playlistinfo string
+  var playlist = string.match(/file: .*\n(.*\n)*?Id: .*\n/g) || [];
+  for (var i = 0; i < playlist.length; i++) {
+    playlist[i] = parsesong(playlist[i]);
   }
+  //console.log(playlist);
 
   return playlist
 }
@@ -139,6 +134,7 @@ app.get('/playlist', function(req, res) {
   console.log("get \"/playlist\"");
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
     if (err) throw err;
+    //console.log(data);
     var playlist = parseplaylist(data);
     res.render('playlist', {song: song, playlist: playlist});
   });
