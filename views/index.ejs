@@ -181,7 +181,7 @@ MRP.insert({
     $.get(uri,null);
     browser_div.innerHTML = load_artist_list();
     
-    reload_playlist();    
+    //reload_playlist();    
   }
   
   function monitor_now_playing() {
@@ -203,6 +203,10 @@ MRP.insert({
     
     socket.on('vote_tally', function(votes) {
       vote_tally.innerHTML = votes;
+    });
+  
+    socket.on('playlist', function() {
+      reload_playlist();
     });
 
     $('#volume').slider().on('slide', function() {
@@ -247,7 +251,7 @@ MRP.insert({
   function deleteSong(song) {
     var uri = encodeURI("/delete/" + song);
     $.get(uri, null);
-    reload_playlist();
+    //reload_playlist();
   }
   
   function reset_vote_buttons() {

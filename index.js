@@ -23,30 +23,33 @@ var parsesong = function(string) {
   if (string === "") {
     return null;
   } else {
-    var title = string.match(/Title: \w.*/g) || ["Title: TITLE_NOT_FOUND"];
-    var artist = string.match(/\bArtist: \w.*/g) || ["Artist: "];
-    var album = string.match(/Album: \w.*/g) || ["Album: "];
-    var pos = string.match(/Pos: \w.*/g) || ["Pos: "];
+    var title = string.match(/Title:.*/g) || ["Title: TITLE_NOT_FOUND"];
+    var artist = string.match(/\bArtist:.*/g) || ["Artist: "];
+    var album = string.match(/Album:.*/g) || ["Album: "];
+    var pos = string.match(/Pos:.*/g) || ["Pos: "];
+    var file = string.match(/file:.*/g) || ["file: "];
+
     return { 
       title: title[0].substr(7), 
       artist: artist[0].substr(8), 
       album: album[0].substr(7), 
       pos: pos[0].substr(5), 
+      file: file[0].substr(6).replace("\'", "\\\'")  // handle songs with special characters in file
     }
   }
 }
 
 // Return information about each song in the playlist
 // This function can be altared to return more or less information about each song
-var parseplaylist = function(string) {
-  // match all content between file: and Id: in playlistinfo string
-  var playlist = string.match(/file: .*\n(.*\n)*?Id: .*\n/g) || [];
-  for (var i = 0; i < playlist.length; i++) {
-    playlist[i] = parsesong(playlist[i]);
+var parsesongs = function(string) {
+  // match all content between file: and ^file: in songs string
+  var songs = string.match(/file:.*\n(([^file].*\n)*)/g) || [];
+  for (var i = 0; i < songs.length; i++) {
+    songs[i] = parsesong(songs[i]);
   }
-  //console.log(playlist);
+  //console.log(songs);
 
-  return playlist
+  return songs
 }
 
 // render index page
@@ -93,18 +96,9 @@ app.get('/browse/:artist/:album', function(req, res) {
   console.log("get \"/browse/" + artist + "/" + album + "\""); 
   mpdclient.sendCommand(cmd('find',['album', album]), function(err, data) {
     //console.log(data);
-    var files = data.match(/file: \w.*/g);
-    var titles = data.match(/Title: \w.*/g) || [];
+    var albumsongs = parsesongs(data);
 
-    var songs = [];
-    for (var i = 0; i < titles.length; i++) {
-      songs.push({
-        file: files[i].substr(6),
-        title: titles[i].substr(7)
-      });
-    }
-
-    res.render('list_songs', {songs: songs, artist: artist, album: album});
+    res.render('list_songs', {songs: albumsongs, artist: artist, album: album});
   });
 });
 
@@ -135,7 +129,7 @@ app.get('/playlist', function(req, res) {
   mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
     if (err) throw err;
     //console.log(data);
-    var playlist = parseplaylist(data);
+    var playlist = parsesongs(data);
     res.render('playlist', {song: song, playlist: playlist});
   });
 });
@@ -200,10 +194,13 @@ mpdclient.on('system', function(name) {
       votes = 0;
       io.emit('now_playing', song);
     });
-  } else if (name === "playlist") {
+
+  // if the playlist changes, tell the client to render /playlist
+  } else if (name === "playlist") {   
+    io.emit('playlist');
     mpdclient.sendCommand(cmd('playlistinfo', []), function(err, data) {
       if (err) throw err;
-      if (parseplaylist(data).length > 0) {
+      if (parsesongs(data).length > 0) {
         mpdclient.sendCommand(cmd('play', []), function(err, data) {
           if (err) throw err;
         });
