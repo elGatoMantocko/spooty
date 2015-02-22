@@ -1,12 +1,14 @@
 <ul class="list-group">
   <% for (var i = 0; i < playlist.length; i++) { %>
-    <% if (song && song.pos == playlist[i].pos) { %><b><% } %>
-    <li class="list-group-item">
+    <% if (song && song.pos == playlist[i].pos) { %>
+      <li class="list-group-item active">
+    <% } else { %>
+      <li class="list-group-item">
+    <% } %>
       <%= parseInt(playlist[i].pos) + 1 %>: <%= playlist[i].title %> - <%= playlist[i].artist %> - <%= playlist[i].album %>
       <span class="badge">
         <button type="button" class="close" onClick="deleteSong(<%= playlist[i].pos %>)" aria-hidden="true">&times;</button>
       </span>
     </li>
-    <% if (song && song.pos == playlist[i].pos) { %></b><% } %>
   <% } %>
 </ul>
