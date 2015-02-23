@@ -69,7 +69,7 @@ app.get('/browse', function(req, res) {
   mpdclient.sendCommand(cmd('list',['artist']), function(err, data) {
     var artists = data.split("\n");
     for (var i = 0; i < artists.length; i++) {
-      artists[i] = artists[i].substr(8);
+      artists[i] = artists[i].substr(8).replace("\'", "\\\'");
     }
     res.render('list_artists', {artists: artists});
   });
@@ -83,7 +83,7 @@ app.get('/browse/:artist', function(req, res) {
   mpdclient.sendCommand(cmd('list',['album', artist]), function(err, data) {
     var albums = data.split("\n");
     for (var i = 0; i < albums.length; i++) {
-      albums[i] = albums[i].substr(7);
+      albums[i] = albums[i].substr(7).replace("\'", "\\\'");
     }
     res.render('list_albums', {artist: artist, albums: albums, other: []});
   });
