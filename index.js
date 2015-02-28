@@ -3,12 +3,15 @@ var app = express();
 var http = require('http').Server(app);
 var path = require('path');
 var favicon = require('serve-favicon');
+var bodyparser = require('body-parser');
 var io = require('socket.io')(http);
 var mpd = require('mpd');
 var cmd = mpd.cmd;
 var mpdclient = mpd.connect({ port: 6600, host: 'localhost' });
 
+// set middleware used here
 app.set('view engine', 'ejs');
+app.use(bodyparser.urlencoded({ extended: false }));
 app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(express.static(__dirname + '/public'));
 
@@ -112,11 +115,13 @@ app.post('/add/*', function(req, res) {
     if (err) throw err;
     console.log(data);
   });
+  res.end("yes");
 });
 
 app.get('/add/*', function(req, res) {
   var filepath = req.params[0];
   console.log("get \"/add/" + filepath); 
+  res.end("yes");
 });
 
 app.get('/delete/:pos', function(req, res) {
