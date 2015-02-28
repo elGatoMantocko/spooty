@@ -67,6 +67,7 @@ app.get('/', function(req, res) {
 app.get('/browse', function(req, res) {
   console.log("get \"/browse\"");
   mpdclient.sendCommand(cmd('list',['artist']), function(err, data) {
+    if (err) throw err;
     var artists = data.split("\n");
     for (var i = 0; i < artists.length; i++) {
       artists[i] = artists[i].substr(8).replace("\'", "\\\'");
@@ -81,6 +82,7 @@ app.get('/browse/:artist', function(req, res) {
   console.log("get \"/browse/" + artist + "\"");
   // TODO: show songs outside of album directories
   mpdclient.sendCommand(cmd('list',['album', artist]), function(err, data) {
+    if (err) throw err;
     var albums = data.split("\n");
     for (var i = 0; i < albums.length; i++) {
       albums[i] = albums[i].substr(7).replace("\'", "\\\'");
@@ -95,6 +97,7 @@ app.get('/browse/:artist/:album', function(req, res) {
       album = req.params.album;
   console.log("get \"/browse/" + artist + "/" + album + "\""); 
   mpdclient.sendCommand(cmd('find',['album', album]), function(err, data) {
+    if (err) throw err;
     //console.log(data);
     var albumsongs = parsesongs(data);
 
@@ -106,6 +109,7 @@ app.post('/add/*', function(req, res) {
   var filepath = req.params[0];
   console.log("post \"/add/" + filepath); 
   mpdclient.sendCommand(cmd('add',[filepath]), function(err, data) {
+    if (err) throw err;
     console.log(data);
   });
 });
@@ -156,6 +160,7 @@ app.get('/downvote', function(req, res) {
 var timerId = setInterval(function() {
   mpdclient.sendCommand(cmd('status', []), function(err, statusdata) {
     mpdclient.sendCommand(cmd('currentsong', []), function(err, songdata) {
+      if (err) throw err;
       // handle current song
       song = parsesong(songdata);
       if (!song) {
