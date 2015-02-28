@@ -130,6 +130,7 @@ app.get('/delete/:pos', function(req, res) {
   mpdclient.sendCommand(cmd('delete',[pos]), function(err, data) {
     if (err) throw err;
   });
+  res.end("yes");
 });
 
 // Get and parse the playlist info
