@@ -149,6 +149,7 @@ app.get('/upvote', function(req, res) {
   console.log("get \"/upvote\"");
   votes += 1;
   io.emit('vote_tally', votes);
+  res.end("yes");
 });
 
 // TODO: when the majority of the population downvotes, skip the song
@@ -160,6 +161,8 @@ app.get('/downvote', function(req, res) {
       if (err) throw err;
     });
   }
+
+  res.end("yes");
 });
 
 // Send the position to the client every second
@@ -170,6 +173,7 @@ var timerId = setInterval(function() {
       // handle current song
       song = parsesong(songdata);
       if (!song) {
+        io.emit('position', {time: "", percentage: "0%"});
         return;
       }
 
@@ -188,7 +192,7 @@ var timerId = setInterval(function() {
       var pct = Math.round(pos/songlength*100).toString() + '%';
 
       var position = {time: time, percentage: pct};
-      io.emit('position', position)
+      io.emit('position', position);
     });
   });
 }, 1000);
