@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
+var request = require("request");
 var path = require('path');
 var favicon = require('serve-favicon');
 var bodyparser = require('body-parser');
@@ -59,10 +60,15 @@ var parsesongs = function(string) {
 app.get('/', function(req, res) {
   console.log("get \"/\"");
 
-  res.render('index', {
-    song: song,
-    vote_tally: votes,
-    username: "Elliott"
+  request("http://api.ipify.org", function(error, response, body) {
+    //console.log(body);
+
+    res.render('index', {
+      song: song,
+      vote_tally: votes,
+      username: "Elliott",
+      publicip: body
+    });
   });
 });
 
