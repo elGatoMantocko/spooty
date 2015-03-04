@@ -115,13 +115,13 @@ app.post('/add/*', function(req, res) {
     if (err) throw err;
     console.log(data);
   });
-  res.end("yes");
+  res.end("POST: successfully added song");
 });
 
 app.get('/add/*', function(req, res) {
   var filepath = req.params[0];
   console.log("get \"/add/" + filepath); 
-  res.end("yes");
+  res.end("GET: successfully added song");
 });
 
 app.get('/delete/:pos', function(req, res) {
@@ -130,7 +130,7 @@ app.get('/delete/:pos', function(req, res) {
   mpdclient.sendCommand(cmd('delete',[pos]), function(err, data) {
     if (err) throw err;
   });
-  res.end("yes");
+  res.end("GET: successfully deleted song");
 });
 
 // Get and parse the playlist info
@@ -149,7 +149,7 @@ app.get('/upvote', function(req, res) {
   console.log("get \"/upvote\"");
   votes += 1;
   io.emit('vote_tally', votes);
-  res.end("yes");
+  res.end("GET: upvote");
 });
 
 // TODO: when the majority of the population downvotes, skip the song
@@ -162,7 +162,7 @@ app.get('/downvote', function(req, res) {
     });
   }
 
-  res.end("yes");
+  res.end("GET: downvote");
 });
 
 // Send the position to the client every second
