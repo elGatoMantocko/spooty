@@ -60,6 +60,7 @@ var parsesongs = function(string) {
 app.get('/', function(req, res) {
   console.log("get \"/\"");
 
+  // get public ip address so that clients know where the stream is located
   request("http://api.ipify.org", function(error, response, body) {
     //console.log(body);
 
