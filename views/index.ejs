@@ -111,22 +111,9 @@
 
 
 <div style="visibility:hidden">
-<!-- BEGINS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
-<script type="text/javascript">
-MRP.insert({
-'url':'http://99.119.110.68:8000/mpd',
-'codec':'mp3',
-'volume':75,
-'autoplay':true,
-'buffering':5,
-'title':'CurateDJ',
-'bgcolor':'#FFFFFF',
-'skin':'mcclean',
-'width':180,
-'height':60
-});
-</script>
-<!-- ENDS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+  <audio id="playback" controls autoplay name="media">
+    <source src="http://<%= publicip %>:8000/mpd" type="audio/mpeg">
+  </audio>
 </div>
 
 <script type="text/javascript">
@@ -138,6 +125,7 @@ MRP.insert({
   var vote_tally = document.getElementById('vote_tally');
   var playlist_div = document.getElementById('playlist');
   var browser_div = document.getElementById('browser');
+  var playback = document.getElementById('playback');
 
   reload_playlist();
 
@@ -210,7 +198,7 @@ MRP.insert({
     });
 
     $('#volume').slider().on('slide', function() {
-      MRP.setVolume($('#volume').slider().data('slider').value[0]);
+      playback.volume = ($('#volume').slider().data('slider').value[0])/100;
     });
   }
 
@@ -221,10 +209,8 @@ MRP.insert({
 	  if (currentVolume != 0) {
 		  lastVolumeLevel = currentVolume;
 		  $('#volume').slider().data('slider').setValue(0);
-		  MRP.setVolume(0)
 	  } else {
 		  $('#volume').slider().data('slider').setValue(lastVolumeLevel);
-		  MRP.setVolume(lastVolumeLevel);
 	  }
   }
 
