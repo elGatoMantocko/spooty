@@ -60,6 +60,7 @@ app.get('/', function(req, res) {
   console.log("get \"/\"");
 
   res.render('index', {
+    publicip: "99.119.110.68",
     song: song,
     vote_tally: votes,
     username: "Elliott"

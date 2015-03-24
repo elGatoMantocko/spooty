@@ -4,7 +4,13 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" contents="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>spooty</title>
+    <title id='song_title'>
+      <% if (song != null) { %>
+        <%= song.title %>
+      <% } else { %>
+        spooty
+      <% } %>
+    </title>
 
 		<!-- Bootstrap -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
@@ -12,9 +18,6 @@
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     
-    <!-- Muses Radio Player -->
-    <script type="text/javascript" src="http://hosted.musesradioplayer.com/mrp.js"></script>
-
     <!-- Custom Styles and Javascripts -->
 		<link rel="stylesheet" href="/css/main.css">
 		<link rel="stylesheet" href="/css/bootstrap-slider.min.css">
@@ -109,8 +112,7 @@
 			</div>
 
 
-
-<div style="visibility:hidden">
+<div>
   <audio id="playback" controls autoplay name="media">
     <source src="http://<%= publicip %>:8000/mpd" type="audio/mpeg">
   </audio>

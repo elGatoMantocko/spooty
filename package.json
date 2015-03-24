@@ -13,6 +13,7 @@
     "express": "~4.10.8",
     "mpd": "~1.2.0",
     "serve-favicon": "~2.2.0",
-    "socket.io": "~1.3.4"
+    "socket.io": "~1.3.4",
+    "openurl": "~1.1.0"
   }
 }
