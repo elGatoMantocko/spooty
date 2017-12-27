@@ -1,0 +1,15 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended", "google"],
+  "env": {
+    "node": true,
+    "browser": "true"
+  },
+  "globals": {
+    "Global": true
+  },
+  "rules": {
+    "require-jsdoc": 0,
+    "max-len": 0
+  }
+}

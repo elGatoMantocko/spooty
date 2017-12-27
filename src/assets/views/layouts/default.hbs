@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title }}</title>
+  <link rel="stylesheet" type="text/css" href="/assets/styles.css">
+  <link rel="stylesheet" type="text/css" href="/resources/tether/dist/css/tether.min.css">
+  <link rel="stylesheet" type="text/css" href="/resources/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+  {{> header}}
+  {{> content}}
+  {{> footer}}
+
+  <script type="text/javascript">
+    window.Global = {{{model}}};
+  </script>
+  <script type="text/javascript" src="/resources/handlebars/dist/handlebars.min.js"></script>
+  <script type="text/javascript" src="/resources/tether/dist/js/tether.min.js"></script>
+  <script type="text/javascript" src="/resources/jquery/dist/jquery.slim.min.js"></script>
+  <script type="text/javascript" src="/resources/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/assets/templates.js"></script>
+  <script type="text/javascript" src="/assets/app.js"></script>
+  {{> more-scripts}}
+</body>
+</html>

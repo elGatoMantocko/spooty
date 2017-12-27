@@ -1,0 +1,35 @@
+{
+  "scripts": {
+    "build": "node node_modules/gulp/bin/gulp.js build",
+    "lint": "node node_modules/eslint/bin/eslint src/server/*.js test/**/*.js src/assets/js/**/*.js",
+    "start": "node src/server/app.js --port 3000",
+    "watch": "node node_modules/nodemon/bin/nodemon --watch src/server --ext js --watch test --ext js --watch src/assets/js --ext js --watch src/assets/less --ext less --watch src/assets/views --ext hbs --exec \"npm run build && npm run start\""
+  },
+  "dependencies": {
+    "bootstrap": "^4.0.0-alpha.6",
+    "express": "^4.16.2",
+    "handlebars": "^4.0.11",
+    "jquery": "^3.2.1",
+    "tether": "^1.4.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^7.2.3",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.14.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-config-recommended": "^2.0.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-declare": "^0.3.0",
+    "gulp-eslint": "^4.0.0",
+    "gulp-less": "^3.4.0",
+    "gulp-load-plugins": "^1.5.0",
+    "gulp-postcss": "^7.0.0",
+    "gulp-sourcemaps": "^2.6.2",
+    "gulp-uglify": "^3.0.0",
+    "gulp-wrap": "^0.13.0",
+    "nodemon": "^1.14.3"
+  }
+}
