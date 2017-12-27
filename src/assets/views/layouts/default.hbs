@@ -2,13 +2,16 @@
 <html>
 <head>
   <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="/assets/styles.css">
   <link rel="stylesheet" type="text/css" href="/resources/tether/dist/css/tether.min.css">
   <link rel="stylesheet" type="text/css" href="/resources/bootstrap/dist/css/bootstrap.min.css">
 </head>
 <body>
   {{> header}}
-  {{> content}}
+  <div class="app">
+    {{> content}}
+  </div>
   {{> footer}}
 
   <script type="text/javascript">
