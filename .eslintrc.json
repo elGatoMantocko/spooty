@@ -3,13 +3,18 @@
   "extends": ["eslint:recommended", "google"],
   "env": {
     "node": true,
-    "browser": "true"
+    "browser": true,
+    "jquery": true,
+    "es6": true
   },
   "globals": {
-    "Global": true
+    "Global": true,
+    "Spotify": true,
+    "Handlebars": true
   },
   "rules": {
     "require-jsdoc": 0,
-    "max-len": 0
+    "max-len": 0,
+    "camelcase": 0
   }
 }

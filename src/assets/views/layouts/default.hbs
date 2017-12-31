@@ -6,6 +6,9 @@
   <link rel="stylesheet" type="text/css" href="/assets/styles.css">
   <link rel="stylesheet" type="text/css" href="/resources/tether/dist/css/tether.min.css">
   <link rel="stylesheet" type="text/css" href="/resources/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/resources/bootstrap-slider/dist/css/bootstrap-slider.min.css">
+  <link rel="stylesheet" type="text/css" href="/resources/open-iconic/font/css/open-iconic-bootstrap.min.css">
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
 </head>
 <body>
   {{> header}}
@@ -17,10 +20,12 @@
   <script type="text/javascript">
     window.Global = {{{model}}};
   </script>
+  <script type="text/javascript" src="https://sdk.scdn.co/spotify-player.js"></script>
   <script type="text/javascript" src="/resources/handlebars/dist/handlebars.min.js"></script>
   <script type="text/javascript" src="/resources/tether/dist/js/tether.min.js"></script>
-  <script type="text/javascript" src="/resources/jquery/dist/jquery.slim.min.js"></script>
+  <script type="text/javascript" src="/resources/jquery/dist/jquery.min.js"></script>
   <script type="text/javascript" src="/resources/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/resources/bootstrap-slider/dist/bootstrap-slider.min.js"></script>
   <script type="text/javascript" src="/assets/templates.js"></script>
   <script type="text/javascript" src="/assets/app.js"></script>
   {{> more-scripts}}

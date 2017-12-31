@@ -2,14 +2,17 @@
   "scripts": {
     "build": "node node_modules/gulp/bin/gulp.js build",
     "lint": "node node_modules/eslint/bin/eslint src/server/*.js test/**/*.js src/assets/js/**/*.js",
-    "start": "node src/server/app.js --port 3000",
-    "watch": "node node_modules/nodemon/bin/nodemon --watch src/server --ext js --watch test --ext js --watch src/assets/js --ext js --watch src/assets/less --ext less --watch src/assets/views --ext hbs --exec \"npm run build && npm run start\""
+    "start": "npm run build && node src/server/app.js --port $PORT --spotifyclientid $CLIENT_ID --spotifyclientsecret $CLIENT_SECRET --spotifyredirecturi $REDIRECT_URI",
+    "watch": "node node_modules/nodemon/bin/nodemon --watch src --ext js,hbs,less --ignore src/assets/bundle --exec \"npm run start\""
   },
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
+    "bootstrap-slider": "^10.0.0",
     "express": "^4.16.2",
     "handlebars": "^4.0.11",
     "jquery": "^3.2.1",
+    "open-iconic": "^1.1.1",
+    "spotify-web-api-js": "^0.23.0",
     "tether": "^1.4.3"
   },
   "devDependencies": {
@@ -21,6 +24,7 @@
     "eslint-config-recommended": "^2.0.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
+    "gulp-clean": "^0.3.2",
     "gulp-concat": "^2.6.1",
     "gulp-declare": "^0.3.0",
     "gulp-eslint": "^4.0.0",

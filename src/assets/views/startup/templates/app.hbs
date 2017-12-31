@@ -2,31 +2,12 @@
   {{#*inline "content"}}
     <div class="container">
       <div class="row">
-        <div class="col-4">
-          <div class="card">
-            <div class="card-block name">
-              My name is Elliott!
-            </div>
-          </div>
-        </div>
-        <div class="col-4">
-          <div class="card">
-            <div class="card-block">
-              Hello world!
-            </div>
-          </div>
-        </div>
-        <div class="col-4">
-          <div class="card">
-            <div class="card-block">
-              This is a basic grid.
-            </div>
-          </div>
-        </div>
+        <div class="col-md-8 col-sm-12 song-info"></div>
+        <div class="col-md-4 col-sm-12 user-info"></div>
       </div>
     </div>
   {{/inline}}
   {{#*inline "more-scripts"}}
-    <script>Global.Startup.Presenters.App();</script>
+    <script type="text/javascript">Global.Startup.Presenters.Spotify();</script>
   {{/inline}}
 {{/layouts/default}}
