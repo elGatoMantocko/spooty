@@ -30,6 +30,7 @@ Global.Startup.Presenters.Spotify = function() {
     let timer;
     // Playback status updates
     player.on('player_state_changed', (state) => {
+      if (!state) return;
       $('.song-info').empty().append(Handlebars.templates['startup/templates/playback-state'](state));
       $('.playback-status').empty().append(state.paused ? 'Paused' : 'Playing');
       $('.song-progress').empty().append(Handlebars.templates['startup/templates/song-progress']({
