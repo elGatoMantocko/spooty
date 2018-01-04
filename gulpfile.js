@@ -57,3 +57,10 @@ gulp.task('bundleHbs', function(done) {
 });
 
 gulp.task('build', ['bundleJs', 'bundleLess', 'bundleHbs', 'bundleStatic']);
+
+gulp.task('watch', function() {
+  gulp.watch(path.join(CLIENT_JS_SRC, '**', '*.js'), ['bundleJs']);
+  gulp.watch(path.join(CLIENT_HBS_SRC, '**', '*.hbs'), ['bundleHbs']);
+  gulp.watch(path.join(CLIENT_LESS_SRC, '*.less'), ['bundleLess']);
+  gulp.watch(path.join(CLIENT_STATIC_FILES, '*'), ['bundleStatic']);
+});

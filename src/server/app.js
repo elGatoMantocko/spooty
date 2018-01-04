@@ -2,7 +2,11 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+
 const Handlebars = require('handlebars');
+const bodyParser = require('body-parser');
+const upload = require('multer')();
+
 const {login} = require(path.join(__dirname, 'libs', 'spotifauth.js'));
 const app = express();
 
@@ -46,6 +50,11 @@ app.set('spotify_client_id', SPOTIFY_CLIENT_ID);
 app.set('spotify_client_secret', SPOTIFY_CLIENT_SECRET);
 app.set('spotify_redirect_uri', SPOTIFY_REDIRECT_URI);
 
+app.set('rooms', {});
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
 app.use('/resources', express.static('node_modules'));
 app.use('/assets', express.static(bundleDir));
 
@@ -55,6 +64,8 @@ app.get('/login-to-spotify', function(req, res) {
 
   const scopes = [
     'streaming',
+    'user-modify-playback-state',
+    'playlist-read-private',
     'user-read-birthdate',
     'user-read-email',
     'user-read-private',
@@ -84,6 +95,48 @@ app.get('/authorize-spotify', function(req, res) {
     res.render('startup/templates/400', {error: err});
   });
 });
+
+app.param('room_id', function(req, res, next, id) {
+  req.room = {id: id};
+  next();
+});
+
+// rooms path
+app.route('/rooms/:room_id?')
+  // check if the room_id param exists
+  .all(function(req, res, next) {
+    const room = req.params.room_id;
+    if (!room) {
+      req.room = {};
+    }
+    next();
+  })
+
+  // get the room from room_id or all rooms
+  .get(function(req, res) {
+    if (req.room.id) res.json(app.get('rooms')[req.room.id]);
+    else res.json(app.get('rooms'));
+  })
+
+  // create a room
+  .post(upload.array(), function(req, res, next) {
+    if (req.room.id) {
+      app.set('rooms')[req.room.id] = req.body;
+      console.log('created room ' + req.room.id);
+      res.json(app.get('rooms')[req.room.id]);
+    } else {
+      next(new Error('room id not passed'));
+    }
+  })
+
+  // delete a room
+  .delete(function(req, res, next) {
+    if (req.room.id) {
+      res.write(delete app.get('rooms')[req.room.id]);
+    } else {
+      next(new Error('room id not passed'));
+    }
+  });
 
 // redirect all trafic over ssl
 app.get('/', (req, res) => res.redirect('/home'));

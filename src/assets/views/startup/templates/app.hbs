@@ -2,8 +2,28 @@
   {{#*inline "content"}}
     <div class="container">
       <div class="row">
-        <div class="col-md-8 col-sm-12 song-info"></div>
-        <div class="col-md-4 col-sm-12 user-info"></div>
+        <div class="col-md-8 col-sm-12">
+          <div class="row">
+            <div class="col-12">
+              <div class="input-group">
+                <input type="text" id="playlist-search" class="form-control typeahead" placeholder="Search playlists on Spotify...">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <div class="autocomplete-results"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="row">
+            <div class="col-12 user-info"></div>
+          </div>
+          <div class="row">
+            <div class="col-12 song-info"></div>
+          </div>
+        </div>
       </div>
     </div>
   {{/inline}}
