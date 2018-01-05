@@ -2,30 +2,54 @@
 Global.Startup.Presenters = Global.Startup.Presenters || {};
 Global.Startup.Presenters.Spotify = function() {
   // initialization
-  const auth = JSON.parse(Global.globalContext.get('spotify_auth') || JSON.stringify({error: ''}));
-  const token = auth.access_token;
-  $.ajaxSetup({
-    headers: {
-      'Authorization': 'Bearer ' + token,
-    },
-  });
+  let auth = JSON.parse(Global.globalContext.get('spotify_auth') || '{}');
 
   // spotify player sdk
   window.onSpotifyWebPlaybackSDKReady = () => {
-    if (token) {
+    function setupAjax() {
+      $.ajaxSetup({
+        headers: {
+          'Authorization': auth.token_type + ' ' + auth.access_token,
+        },
+      });
+    }
+
+    if (auth.access_token) {
+      setupAjax(auth);
+
+      window.setInterval(() => {
+        // refresh the spotify auth token every <expires_in> interval
+        $.getJSON('/refresh-spotify', {
+          // the second time this runs there will be an error
+          //  the refresh grant_type doesn't return a refresh token
+          refresh_token: auth.refresh_token,
+        }).then((data) => {
+          setupAjax(auth = data);
+        }, (e) => console.error(e));
+      }, auth.expires_in * 1000);
+
       $('#login-btn').text('Refresh');
     } else {
+      // stop execution if the users token is mia or invalid
       return;
     }
 
     // get user info to display
     $.getJSON('https://api.spotify.com/v1/me').then((response) => {
-      $('.user-info').append(Handlebars.templates['startup/templates/user'](response));
+      $.extend(Global.user, {
+        name: response.display_name,
+        email: response.email,
+        product: response.product,
+        profilePage: response.external_urls.spotify,
+        profilePicture: response.images[0].url,
+      });
+
+      $('.user-info').append(Handlebars.templates['startup/templates/user'](Global.user));
     });
 
     const player = new Spotify.Player({
       name: 'Spooty',
-      getOAuthToken: (cb) => cb(token),
+      getOAuthToken: (cb) => cb(auth.access_token),
     });
 
     // Error handling
@@ -39,7 +63,6 @@ Global.Startup.Presenters.Spotify = function() {
     player.on('player_state_changed', (state) => {
       if (!state) return;
       $('.song-info').empty().append(Handlebars.templates['startup/templates/playback-state'](state));
-      $('.playback-status').empty().append(state.paused ? 'Paused' : 'Playing');
       $('.song-progress').empty().append(Handlebars.templates['startup/templates/song-progress']({
         size: (state.position / state.duration) * 100,
         position: state.position,
@@ -95,7 +118,11 @@ Global.Startup.Presenters.Spotify = function() {
             }).then(() => console.log('playing ' + $(this).data('value')), (e) => console.error(e));
 
             // submit the room object
-            $.post(`/rooms/${$(this).data('id')}`, roomData);
+            $.post(`/rooms/${$(this).data('id')}`, roomData).then((response) => {
+              if (response.success) {
+                $('.room-info').empty().append();
+              }
+            });
           });
       }
 
@@ -107,7 +134,7 @@ Global.Startup.Presenters.Spotify = function() {
             q: $(e.currentTarget).val(),
             type: 'playlist',
             limit: 5,
-            market: 'US',
+            market: 'from_token',
           }).then((data) => {
             // map the data to autocomplete saavy format
             const results = data.playlists.items.map((item) => {

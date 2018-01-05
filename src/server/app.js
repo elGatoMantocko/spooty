@@ -2,12 +2,14 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const https = require('https');
 
 const Handlebars = require('handlebars');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const upload = require('multer')();
 
-const {login} = require(path.join(__dirname, 'libs', 'spotifauth.js'));
+const {login, refresh} = require('spotifauth');
 const app = express();
 
 const SPOTIFY_CLIENT_ID = process.argv[process.argv.indexOf('--spotifyclientid') + 1];
@@ -54,6 +56,7 @@ app.set('rooms', {});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 app.use('/resources', express.static('node_modules'));
 app.use('/assets', express.static(bundleDir));
@@ -66,6 +69,7 @@ app.get('/login-to-spotify', function(req, res) {
     'streaming',
     'user-modify-playback-state',
     'playlist-read-private',
+    'playlist-read-collaborative',
     'user-read-birthdate',
     'user-read-email',
     'user-read-private',
@@ -87,12 +91,25 @@ app.get('/authorize-spotify', function(req, res) {
     app.get('spotify_redirect_uri'), // redirect uri has to match authorize endpoint
     app.get('spotify_client_id'), // spotify client id
     app.get('spotify_client_secret'), // spotify client secret
-  ).then((token) => {
-    res.cookie('spotify_auth', token);
-    res.cookie('data', JSON.stringify({test: 'Hello world!'}));
+  ).then((authdata) => {
+    res.cookie('spotify_auth', JSON.stringify(authdata));
     res.redirect('/home');
   }, (err) => {
     res.render('startup/templates/400', {error: err});
+  });
+});
+
+app.get('/refresh-spotify', function(req, res) {
+  console.log(`inbound request to '/refresh-spotify'`);
+
+  refresh(
+    req.query.refresh_token,
+    app.get('spotify_client_id'),
+    app.get('spotify_client_secret'),
+  ).then((authdata) => {
+    res.json(authdata);
+  }, (err) => {
+    res.json({error: 'error getting refreshed token'});
   });
 });
 
@@ -121,9 +138,14 @@ app.route('/rooms/:room_id?')
   // create a room
   .post(upload.array(), function(req, res, next) {
     if (req.room.id) {
-      app.set('rooms')[req.room.id] = req.body;
-      console.log('created room ' + req.room.id);
-      res.json(app.get('rooms')[req.room.id]);
+      let rooms = app.get('rooms');
+      if (rooms[req.room.id]) {
+        res.json({status: 'success', message: 'room already exists'});
+      } else {
+        rooms[req.room.id] = req.body;
+        console.log('created room ' + req.room.id);
+        res.json({status: 'success', message: 'new room created'});
+      }
     } else {
       next(new Error('room id not passed'));
     }
@@ -143,15 +165,32 @@ app.get('/', (req, res) => res.redirect('/home'));
 app.get('/home', function(req, res) {
   console.log(`inbound request to '/'`);
 
-  // build the app model
-  let model = {
-    Startup: {
-      Models: {},
-      Presenters: {},
+  const auth = req.cookies.spotify_auth || '{}';
+  const token = JSON.parse(auth).access_token;
+  const me_options = {
+    hostname: 'api.spotify.com',
+    path: '/v1/me',
+    headers: {
+      'Authorization': 'Bearer ' + token,
     },
   };
 
-  res.render('startup/templates/app', {title: 'Spooty', model: JSON.stringify(model)});
+  // get (at minimum) the user id for the client to use
+  https.get(me_options, (me_res) => {
+    let data = '';
+    me_res.on('data', (chunk) => data += chunk);
+    me_res.on('end', () => {
+      const {id} = JSON.parse(data);
+
+      // build the app model
+      let model = {
+        user: {id: id},
+        Startup: {Models: {}, Presenters: {}},
+      };
+
+      res.render('startup/templates/app', {title: 'Spooty', model: JSON.stringify(model)});
+    });
+  }).on('error', (e) => console.error(e));
 });
 
 app.listen(APP_PORT, () => console.log(`server started on port ${APP_PORT} with CLIENT_ID:${SPOTIFY_CLIENT_ID} CLIENT_SECRET:${SPOTIFY_CLIENT_SECRET} and REDIRECT_URI:${SPOTIFY_REDIRECT_URI}`));

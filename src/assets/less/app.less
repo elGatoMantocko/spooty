@@ -1,5 +1,8 @@
 .app {
   margin-top: 12px;
+  .profile-pic {
+    height: 100px;
+  }
 }
 .name {
   font-style: italic;
@@ -12,35 +15,35 @@
     margin: 0;
     list-style-type: none;
     padding: 5px;
-  }
 
-  a, a:hover, a.details {
-    display: block;
-    padding: 8px;
-    color: #5e778b;
-    text-decoration: none;
-    width: 100%;
-    font-size: 15px;
-    // .border-radius(a, @autocompleteResultsFontSize, @radiusDefault);
+    a, a:hover, a.details {
+      display: inline-block;
+      padding: 8px;
+      color: #5e778b;
+      text-decoration: none;
+      width: 100%;
+      font-size: 15px;
+      // .border-radius(a, @autocompleteResultsFontSize, @radiusDefault);
 
-    &.highlight {
-      background: #f0f1f3;
-    }
-
-    &.close {
-      // color: @siteDefaultFontColor;
-      float: right;
-      width: auto;
-      // #font.size(@autocompleteResultsFontSize);
-      padding-right: 0;
-
-      &:hover, &.highlight {
-        background: none;
-        color: #152835;
+      &.highlight {
+        background: #f0f1f3;
       }
 
-      .icon {
-        // .padding(l, @autocompleteResultsFontSize, 6);
+      &.close {
+        // color: @siteDefaultFontColor;
+        float: right;
+        width: auto;
+        // #font.size(@autocompleteResultsFontSize);
+        padding-right: 0;
+
+        &:hover, &.highlight {
+          background: none;
+          color: #152835;
+        }
+
+        .icon {
+          // .padding(l, @autocompleteResultsFontSize, 6);
+        }
       }
     }
   }

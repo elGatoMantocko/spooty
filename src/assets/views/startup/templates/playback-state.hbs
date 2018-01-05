@@ -1,12 +1,12 @@
 <div class="card">
   <div class="card-block">
     {{#if track_window}}
-      <h4 class="card-title">{{ track_window.current_track.name }}</h4>
+      <h5 class="card-title">{{ track_window.current_track.name }}</h5>
       {{#each track_window.current_track.artists}}
         <h6 class="card-subtitle mb-2 text-muted">{{ name }}</h6>
       {{/each}}
     {{else}}
-      <h4 class="card-title">Nothing Playing</h4>
+      <h5 class="card-title">Nothing Playing</h5>
     {{/if}}
   </div>
 </div>

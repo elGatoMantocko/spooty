@@ -2,8 +2,8 @@
     {{#each results}}
         <li class="results-item">
             <a href="#" data-id="{{id}}" class="{{#if @first}}highlight{{/if}}" data-value="{{value}}">
-                <div class="details">{{{display_value}}}</div>
-                {{#if opt_display_value}}<div class="optional-details">Curated by {{{opt_display_value}}}</div>{{/if}}
+                <div class="details float-left">{{{display_value}}}</div>
+                {{#if opt_display_value}}<div class="optional-details float-right">Curated by {{{opt_display_value}}}</div>{{/if}}
             </a>
         </li>
     {{/each}}
