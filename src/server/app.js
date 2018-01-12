@@ -61,6 +61,12 @@ app.use(cookieParser());
 app.use('/resources', express.static('node_modules'));
 app.use('/assets', express.static(bundleDir));
 
+app.post('/logger/:loggerPath', upload.array(), function(req, res) {
+  const {message, page_url, page_title, user_agent} = req.body;
+  console[req.params.loggerPath](`${page_url} - ${page_title} - ${message} - ${user_agent}`);
+  res.send('DONE');
+});
+
 // generate code for the authorize endpoint
 app.get('/login-to-spotify', function(req, res) {
   console.log(`inbound request to '/login-to-spotify'`);
@@ -163,7 +169,7 @@ app.route('/rooms/:room_id?')
 // redirect all trafic over ssl
 app.get('/', (req, res) => res.redirect('/home'));
 app.get('/home', function(req, res) {
-  console.log(`inbound request to '/'`);
+  console.log(`inbound request to '/home'`);
 
   const auth = req.cookies.spotify_auth || '{}';
   const token = JSON.parse(auth).access_token;
