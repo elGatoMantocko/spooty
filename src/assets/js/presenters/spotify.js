@@ -144,6 +144,7 @@ SP.Presenters.Spotify = function() {
                 value: item.uri,
                 display_value: item.name,
                 opt_display_value: item.owner.display_name || item.owner.id,
+                minor_details: item.tracks.total,
               };
             });
 
