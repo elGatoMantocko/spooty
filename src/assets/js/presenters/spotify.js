@@ -89,6 +89,7 @@ SP.Presenters.Spotify = function() {
     player.on('ready', (data) => {
       let {device_id} = data;
       console.log('Ready with Device ID', device_id);
+      SP.logger.info(`device_id ${device_id} registered`);
 
       function initializeEvents() {
         $('#playlist-search').off('keydown').keydown(function(e) {
