@@ -95,7 +95,7 @@ app.get('/authorize-spotify', function(req, res) {
     res.cookie('spotify_auth', JSON.stringify(authdata));
     res.redirect('/home');
   }, (err) => {
-    res.render('startup/templates/400', {error: err});
+    res.render('spooty/templates/400', {error: err});
   });
 });
 
@@ -185,10 +185,11 @@ app.get('/home', function(req, res) {
       // build the app model
       let model = {
         user: {id: id},
-        Startup: {Models: {}, Presenters: {}},
+        Models: {},
+        Presenters: {},
       };
 
-      res.render('startup/templates/app', {title: 'Spooty', model: JSON.stringify(model)});
+      res.render('spooty/templates/app', {title: 'Spooty', model: JSON.stringify(model)});
     });
   }).on('error', (e) => console.error(e));
 });

@@ -3,6 +3,7 @@
         <li class="results-item">
             <a href="#" data-id="{{id}}" class="{{#if @first}}highlight{{/if}}" data-value="{{value}}">
                 <div class="details float-left">{{{display_value}}}</div>
+                {{#if minor_details}}<div class="minor-details float-right"><i>{{{minor_details}}}</i></div>{{/if}}
                 {{#if opt_display_value}}<div class="optional-details float-right">Curated by {{{opt_display_value}}}</div>{{/if}}
             </a>
         </li>

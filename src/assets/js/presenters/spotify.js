@@ -1,8 +1,8 @@
 /* eslint no-console: 1 */
-Global.Startup.Presenters = Global.Startup.Presenters || {};
-Global.Startup.Presenters.Spotify = function() {
+SP.Presenters = SP.Presenters || {};
+SP.Presenters.Spotify = function() {
   // initialization
-  let auth = JSON.parse(Global.globalContext.get('spotify_auth') || '{}');
+  let auth = JSON.parse(SP.globalContext.get('spotify_auth') || '{}');
 
   // spotify player sdk
   window.onSpotifyWebPlaybackSDKReady = () => {
@@ -36,7 +36,7 @@ Global.Startup.Presenters.Spotify = function() {
 
     // get user info to display
     $.getJSON('https://api.spotify.com/v1/me').then((response) => {
-      $.extend(Global.user, {
+      $.extend(SP.user, {
         name: response.display_name,
         email: response.email,
         product: response.product,
@@ -44,7 +44,7 @@ Global.Startup.Presenters.Spotify = function() {
         profilePicture: response.images[0].url,
       });
 
-      $('.user-info').append(Handlebars.templates['startup/templates/user'](Global.user));
+      $('.user-info').append(Handlebars.templates['spooty/templates/user'](SP.user));
     });
 
     const player = new Spotify.Player({
@@ -62,8 +62,8 @@ Global.Startup.Presenters.Spotify = function() {
     // Playback status updates
     player.on('player_state_changed', (state) => {
       if (!state) return;
-      $('.song-info').empty().append(Handlebars.templates['startup/templates/playback-state'](state));
-      $('.song-progress').empty().append(Handlebars.templates['startup/templates/song-progress']({
+      $('.song-info').empty().append(Handlebars.templates['spooty/templates/playback-state'](state));
+      $('.song-progress').empty().append(Handlebars.templates['spooty/templates/song-progress']({
         size: (state.position / state.duration) * 100,
         position: state.position,
         duration: state.duration,
@@ -151,7 +151,7 @@ Global.Startup.Presenters.Spotify = function() {
 
             // render the data
             $('.autocomplete-results').empty().append(
-              Handlebars.templates['startup/templates/search-results']({
+              Handlebars.templates['spooty/templates/search-results']({
                 autocompleteId: 'playlist-search',
                 results: results,
               })
@@ -160,7 +160,7 @@ Global.Startup.Presenters.Spotify = function() {
             initializeEvents();
           }, (e) => console.error(e));
         } else if ($(e.currentTarget).val()) {
-          $('.autocomplete-results').empty().append(Handlebars.templates['startup/templates/search-results']({
+          $('.autocomplete-results').empty().append(Handlebars.templates['spooty/templates/search-results']({
             autocompleteId: 'playlist-search',
             results: cache[$(e.currentTarget).val()],
           }));
@@ -169,7 +169,7 @@ Global.Startup.Presenters.Spotify = function() {
         }
       });
 
-      $('#song-info').empty().append(Handlebars.templates['startup/templates/playback-state']());
+      $('#song-info').empty().append(Handlebars.templates['spooty/templates/playback-state']());
     });
 
     // Connect to the player!
