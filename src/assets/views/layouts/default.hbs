@@ -17,8 +17,18 @@
   </div>
   {{> footer}}
 
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112419997-1"></script>
   <script type="text/javascript">
+    // piece the Spooty model together
     window.SP = {{{model}}};
+
+    // google analytics
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112419997-1');
   </script>
   <script type="text/javascript" src="https://sdk.scdn.co/spotify-player.js"></script>
   <script type="text/javascript" src="/resources/handlebars/dist/handlebars.min.js"></script>

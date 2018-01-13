@@ -98,11 +98,20 @@ app.get('/authorize-spotify', function(req, res) {
     app.get('spotify_client_id'), // spotify client id
     app.get('spotify_client_secret'), // spotify client secret
   ).then((authdata) => {
-    res.cookie('spotify_auth', JSON.stringify(authdata));
+    res.cookie('spotify_auth', JSON.stringify(authdata), {
+      // domain: '.spooty.com',
+      maxAge: 3600000,
+      secure: true,
+    });
     res.redirect('/home');
   }, (err) => {
     res.render('spooty/templates/400', {error: err});
   });
+});
+
+app.get('/logout-spotify', function(req, res) {
+  res.clearCookie('spotify_auth');
+  res.redirect('/home');
 });
 
 app.get('/refresh-spotify', function(req, res) {
@@ -113,9 +122,9 @@ app.get('/refresh-spotify', function(req, res) {
     app.get('spotify_client_id'),
     app.get('spotify_client_secret'),
   ).then((authdata) => {
-    res.json(authdata);
+    res.jsonp(authdata);
   }, (err) => {
-    res.json({error: 'error getting refreshed token'});
+    res.jsonp({error: 'error getting refreshed token'});
   });
 });
 
@@ -137,8 +146,8 @@ app.route('/rooms/:room_id?')
 
   // get the room from room_id or all rooms
   .get(function(req, res) {
-    if (req.room.id) res.json(app.get('rooms')[req.room.id]);
-    else res.json(app.get('rooms'));
+    if (req.room.id) res.jsonp(app.get('rooms')[req.room.id]);
+    else res.jsonp(app.get('rooms'));
   })
 
   // create a room
@@ -146,11 +155,11 @@ app.route('/rooms/:room_id?')
     if (req.room.id) {
       let rooms = app.get('rooms');
       if (rooms[req.room.id]) {
-        res.json({status: 'success', message: 'room already exists'});
+        res.jsonp({status: 'success', message: 'room already exists'});
       } else {
         rooms[req.room.id] = req.body;
         console.log('created room ' + req.room.id);
-        res.json({status: 'success', message: 'new room created'});
+        res.jsonp({status: 'success', message: 'new room created'});
       }
     } else {
       next(new Error('room id not passed'));
@@ -160,7 +169,7 @@ app.route('/rooms/:room_id?')
   // delete a room
   .delete(function(req, res, next) {
     if (req.room.id) {
-      res.write(delete app.get('rooms')[req.room.id]);
+      res.send(delete app.get('rooms')[req.room.id]);
     } else {
       next(new Error('room id not passed'));
     }

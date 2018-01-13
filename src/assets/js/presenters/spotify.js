@@ -28,7 +28,10 @@ SP.Presenters.Spotify = function() {
         }, (e) => console.error(e));
       }, auth.expires_in * 1000);
 
-      $('#login-btn').text('Refresh');
+      $('#login-btn')
+        .text('Logout')
+        .removeClass('btn-outline-success')
+        .addClass('btn-outline-info');
     } else {
       // stop execution if the users token is mia or invalid
       return;
@@ -50,6 +53,12 @@ SP.Presenters.Spotify = function() {
     const player = new Spotify.Player({
       name: 'Spooty',
       getOAuthToken: (cb) => cb(auth.access_token),
+    });
+
+    // need to handle logout here to disconnect the player
+    $('#login-btn').off('click').click(function(e) {
+      player.disconnect();
+      window.location = '/logout-spotify';
     });
 
     // Error handling
