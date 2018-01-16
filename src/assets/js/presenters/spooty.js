@@ -71,10 +71,10 @@ SP.Presenters.Spotify = function() {
     });
 
     // Error handling
-    player.on('initialization_error', (e) => console.error(e));
-    player.on('authentication_error', (e) => console.error(e));
-    player.on('account_error', (e) => console.error(e));
-    player.on('playback_error', (e) => console.error(e));
+    player.on('initialization_error', (e) => SP.logger.error(e));
+    player.on('authentication_error', (e) => SP.logger.error(e));
+    player.on('account_error', (e) => SP.logger.error(e));
+    player.on('playback_error', (e) => SP.logger.error(e));
 
     let timer;
     // Playback status updates
@@ -140,7 +140,7 @@ SP.Presenters.Spotify = function() {
               url: 'https://api.spotify.com/v1/me/player/play?device_id=' + device_id,
               method: 'PUT',
               data: JSON.stringify(roomData),
-            }).then(() => console.log('playing ' + $(this).data('value')), (e) => console.error(e));
+            }).then(() => console.log('playing ' + $(this).data('value')), (xhr, e) => SP.logger.error(e));
 
             // submit the room object
             $.post(`/rooms/${$(this).data('id')}`, roomData).then((response) => {
