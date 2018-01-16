@@ -1,5 +1,9 @@
 class Logger {
   _log(type = 'info', message) {
+    if (typeof message === 'object') {
+      message = JSON.stringify(message);
+    }
+
     return $.post('/logger/' + type, {
       message: message || 'No message was provided.',
       page_url: window.location.href,
