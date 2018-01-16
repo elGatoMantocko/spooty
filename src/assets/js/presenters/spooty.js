@@ -28,10 +28,11 @@ SP.Presenters.Spotify = function() {
         }, (e) => console.error(e));
       }, auth.expires_in * 1000);
 
+      // change login button to log out
       $('#login-btn')
         .text('Logout')
-        .removeClass('btn-outline-success')
-        .addClass('btn-outline-info');
+        .attr('href', '/logout-spotify')
+        .toggleClass('btn-outline-success btn-outline-info');
     } else {
       // stop execution if the users token is mia or invalid
       return;
@@ -39,15 +40,19 @@ SP.Presenters.Spotify = function() {
 
     // get user info to display
     $.getJSON('https://api.spotify.com/v1/me').then((response) => {
-      $.extend(SP.user, {
-        name: response.display_name,
-        email: response.email,
-        product: response.product,
-        profilePage: response.external_urls.spotify,
-        profilePicture: response.images[0].url,
-      });
+      const {
+        display_name: name,
+        email,
+        product,
+        external_urls: {spotify: profilePage},
+        images: [{url: profilePicture}],
+      } = response;
 
-      $('.user-info').append(Handlebars.templates['spooty/templates/user'](SP.user));
+      $('.user-info').append(
+        Handlebars.templates['spooty/templates/user'](
+          $.extend(SP.user, {name, email, product, profilePage, profilePicture})
+        )
+      );
     });
 
     const player = new Spotify.Player({
@@ -58,7 +63,6 @@ SP.Presenters.Spotify = function() {
     // need to handle logout here to disconnect the player
     $('#login-btn').off('click').click(function(e) {
       player.disconnect();
-      window.location = '/logout-spotify';
     });
 
     // Error handling
@@ -71,20 +75,26 @@ SP.Presenters.Spotify = function() {
     // Playback status updates
     player.on('player_state_changed', (state) => {
       if (!state) return;
-      $('.song-info').empty().append(Handlebars.templates['spooty/templates/playback-state'](state));
+      const {
+        position,
+        duration,
+        track_window: {current_track},
+        paused,
+      } = state;
+      $('.song-info').empty().append(Handlebars.templates['spooty/templates/playback-state']({current_track}));
       $('.song-progress').empty().append(Handlebars.templates['spooty/templates/song-progress']({
-        size: (state.position / state.duration) * 100,
-        position: state.position,
-        duration: state.duration,
+        size: (position / duration) * 100,
+        position,
+        duration,
       }));
 
-      let savedPosition = state.position;
+      let savedPosition = position;
       clearInterval(timer);
-      if (!state.paused) {
+      if (!paused) {
         timer = setInterval(() => {
           savedPosition += 1000;
           $('.song-progress .progress-bar')
-            .width(`${(savedPosition / state.duration) * 100}%`)
+            .width(`${(savedPosition / duration) * 100}%`)
             .attr('aria-valuenow', savedPosition);
         }, 1000);
       }
