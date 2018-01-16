@@ -1,6 +1,6 @@
 /* eslint no-console: 1 */
 SP.Presenters = SP.Presenters || {};
-SP.Presenters.Spotify = function() {
+SP.Presenters.Spooty = function() {
   // spotify player sdk
   window.onSpotifyWebPlaybackSDKReady = () => {
     function setupAjax() {
