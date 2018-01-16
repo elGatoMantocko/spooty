@@ -5,6 +5,7 @@
     "node": true,
     "browser": true,
     "jquery": true,
+    "moment": true,
     "es6": true
   },
   "globals": {

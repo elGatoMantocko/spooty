@@ -61,6 +61,7 @@ app.use(cookieParser());
 app.use('/resources', express.static('node_modules'));
 app.use('/assets', express.static(bundleDir));
 
+// client side logging endpoint
 app.post('/logger/:loggerPath', upload.array(), function(req, res) {
   const {
     params: {loggerPath = 'log'},
@@ -72,7 +73,12 @@ app.post('/logger/:loggerPath', upload.array(), function(req, res) {
     },
   } = req;
 
-  if (!console.hasOwnProperty(loggerPath)) res.status(404).send('Bad request.');
+  // end the response if sent something other than log, debug, warning, or error
+  if (!console.hasOwnProperty(loggerPath)) {
+    res.status(404).send('Bad request.');
+    return;
+  }
+
   console[loggerPath](`${page_url} - ${page_title} - ${message} - ${user_agent}`);
   res.send('DONE');
 });
