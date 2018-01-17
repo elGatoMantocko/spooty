@@ -39,6 +39,11 @@
   <script type="text/javascript" src="/resources/moment/min/moment-with-locales.min.js"></script>
   <script type="text/javascript" src="/assets/templates.js"></script>
   <script type="text/javascript" src="/assets/app.js"></script>
+  <script type="text/javascript">
+    if (SP.user.id) {
+      SP.logger.info('user ' + SP.user.id + ' connected');
+    }
+  </script>
   {{> more-scripts}}
 </body>
 </html>
