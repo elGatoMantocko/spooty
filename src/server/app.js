@@ -79,7 +79,7 @@ app.post('/logger/:loggerPath', upload.array(), function(req, res) {
     return;
   }
 
-  console[loggerPath](`${page_url} - ${page_title} - ${message} - ${user_agent}`);
+  console[loggerPath](`${(new Date()).toUTCString()} - ${page_url} - ${page_title} - ${message} - ${user_agent}`);
   res.send('DONE');
 });
 
