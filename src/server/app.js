@@ -18,14 +18,14 @@ const SPOTIFY_REDIRECT_URI = process.argv[process.argv.indexOf('--spotifyredirec
 let APP_PORT = parseInt(process.argv[process.argv.indexOf('--port') + 1]);
 
 if (!SPOTIFY_CLIENT_ID) {
-  console.error('Spotify Client ID was not provided.\n... -k <CLIENT_ID>');
+  console.error('APPLICATION SARTUP FAILURE - Spotify Client ID was not provided.\n... -k <CLIENT_ID>');
 } else if (!SPOTIFY_CLIENT_SECRET) {
-  console.error('Spotify Client secret was not provided.\n... -s <CLIENT_SECRET>');
+  console.error('APPLICATION SARTUP FAILURE - Spotify Client secret was not provided.\n... -s <CLIENT_SECRET>');
 } else if (!SPOTIFY_REDIRECT_URI) {
-  console.error('Spotify redirect URI was not provided.\n... -u <REDIRECT_URI>');
+  console.error('APPLICATION SARTUP FAILURE - Spotify redirect URI was not provided.\n... -u <REDIRECT_URI>');
 } else if (!APP_PORT || isNaN(APP_PORT)) {
   APP_PORT = 3000;
-  console.warn('It is recommended that you provide a custom app port (must be a number > 0 and < 65536).\n... -p <PORT>');
+  console.warn('WARNING - It is recommended that you provide a custom app port (must be a number > 0 and < 65536).\n... -p <PORT>');
 }
 
 const viewsDir = path.join('src', 'assets', 'views');
@@ -79,13 +79,13 @@ app.post('/logger/:loggerPath', upload.array(), function(req, res) {
     return;
   }
 
-  console[loggerPath](`${(new Date()).toUTCString()} - ${page_url} - ${page_title} - ${message} - ${user_agent}`);
+  console[loggerPath](`${loggerPath.toUpperCase()} - ${(new Date()).toUTCString()} - ${page_url} - ${page_title} - ${message} - ${user_agent}`);
   res.send('DONE');
 });
 
 // generate code for the authorize endpoint
 app.get('/login-to-spotify', function(req, res) {
-  console.debug(`inbound request to '/login-to-spotify'`);
+  console.debug(`DEBUG - inbound request to '/login-to-spotify'`);
 
   const scopes = [
     'streaming',
@@ -105,7 +105,7 @@ app.get('/login-to-spotify', function(req, res) {
 });
 
 app.get('/authorize-spotify', function(req, res) {
-  console.debug(`inbound request to '/authorize-spotify'`);
+  console.debug(`DEBUG - inbound request to '/authorize-spotify'`);
 
   // acquire a spotify auth token
   login(
@@ -126,13 +126,13 @@ app.get('/authorize-spotify', function(req, res) {
 });
 
 app.get('/logout-spotify', function(req, res) {
-  console.debug(`inbound request to '/logout-spotify'`);
+  console.debug(`DEBUG - inbound request to '/logout-spotify'`);
   res.clearCookie('spotify_auth');
   res.redirect('/home');
 });
 
 app.get('/refresh-spotify', function(req, res) {
-  console.debug(`inbound request to '/refresh-spotify'`);
+  console.debug(`DEBUG - inbound request to '/refresh-spotify'`);
 
   refresh(
     req.query.refresh_token,
@@ -175,7 +175,7 @@ app.route('/rooms/:room_id?')
         res.jsonp({status: 'success', message: 'room already exists'});
       } else {
         rooms[req.room.id] = req.body;
-        console.log('created room ' + req.room.id);
+        console.debug('DEBUG - created room ' + req.room.id);
         res.jsonp({status: 'success', message: 'new room created'});
       }
     } else {
@@ -195,7 +195,7 @@ app.route('/rooms/:room_id?')
 // redirect all trafic over ssl
 app.get('/', (req, res) => res.redirect('/home'));
 app.get('/home', function(req, res) {
-  console.debug(`inbound request to '/home'`);
+  console.debug(`DEBUG - inbound request to '/home'`);
 
   const auth = req.cookies.spotify_auth || '{}';
   const token = JSON.parse(auth).access_token;
@@ -223,7 +223,7 @@ app.get('/home', function(req, res) {
 
       res.render('spooty/templates/app', {title: 'Spooty', model: JSON.stringify(model)});
     });
-  }).on('error', (e) => console.error(e));
+  }).on('error', (e) => console.error('ERROR - ' + e.message));
 });
 
-app.listen(APP_PORT, () => console.debug(`server started on port ${APP_PORT} with CLIENT_ID:${SPOTIFY_CLIENT_ID} CLIENT_SECRET:${SPOTIFY_CLIENT_SECRET} and REDIRECT_URI:${SPOTIFY_REDIRECT_URI}`));
+app.listen(APP_PORT, () => console.debug(`DEBUG - server started on port ${APP_PORT} with CLIENT_ID:${SPOTIFY_CLIENT_ID} CLIENT_SECRET:${SPOTIFY_CLIENT_SECRET} and REDIRECT_URI:${SPOTIFY_REDIRECT_URI}`));

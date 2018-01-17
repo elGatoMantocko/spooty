@@ -5,13 +5,13 @@
     "node": true,
     "browser": true,
     "jquery": true,
-    "moment": true,
     "es6": true
   },
   "globals": {
     "SP": true,
     "Spotify": true,
-    "Handlebars": true
+    "Handlebars": true,
+    "moment": true
   },
   "rules": {
     "require-jsdoc": 0,
