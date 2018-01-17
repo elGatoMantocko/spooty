@@ -12,6 +12,16 @@ const upload = require('multer')();
 const {login, refresh} = require('spotifauth');
 const app = express();
 
+const SPOTIFY_SCOPES = [
+  'streaming',
+  'user-modify-playback-state',
+  'playlist-read-private',
+  'playlist-read-collaborative',
+  'user-read-birthdate',
+  'user-read-email',
+  'user-read-private',
+];
+
 const SPOTIFY_CLIENT_ID = process.argv[process.argv.indexOf('--spotifyclientid') + 1];
 const SPOTIFY_CLIENT_SECRET = process.argv[process.argv.indexOf('--spotifyclientsecret') + 1];
 const SPOTIFY_REDIRECT_URI = process.argv[process.argv.indexOf('--spotifyredirecturi') + 1];
@@ -83,30 +93,23 @@ app.post('/logger/:loggerPath', upload.array(), function(req, res) {
   res.send('DONE');
 });
 
+app.all('*', function(req, res, next) {
+  const {originalUrl, body, method, ip, protocol} = req;
+  // time of request - request method - full path - source ip address - protocol (should always be https)
+  console.log(`INFO - ${(new Date()).toUTCString()} - ${method} - ${originalUrl} - ${ip} - ${protocol} - ${JSON.stringify(body)}`);
+  next();
+});
+
 // generate code for the authorize endpoint
 app.get('/login-to-spotify', function(req, res) {
-  console.debug(`DEBUG - inbound request to '/login-to-spotify'`);
-
-  const scopes = [
-    'streaming',
-    'user-modify-playback-state',
-    'playlist-read-private',
-    'playlist-read-collaborative',
-    'user-read-birthdate',
-    'user-read-email',
-    'user-read-private',
-  ];
-
   res.redirect('https://accounts.spotify.com/authorize' +
     '?response_type=code' +
     '&client_id=' + app.get('spotify_client_id') +
-    '&scope=' + encodeURIComponent(scopes.join(' ')) +
+    '&scope=' + encodeURIComponent(SPOTIFY_SCOPES.join(' ')) +
     '&redirect_uri=' + encodeURIComponent(app.get('spotify_redirect_uri')));
 });
 
 app.get('/authorize-spotify', function(req, res) {
-  console.debug(`DEBUG - inbound request to '/authorize-spotify'`);
-
   // acquire a spotify auth token
   login(
     req.query.code, // code required from the authorize endpoint
@@ -120,28 +123,21 @@ app.get('/authorize-spotify', function(req, res) {
       secure: true,
     });
     res.redirect('/home');
-  }, (err) => {
-    res.render('spooty/templates/400', {error: err});
   });
 });
 
 app.get('/logout-spotify', function(req, res) {
-  console.debug(`DEBUG - inbound request to '/logout-spotify'`);
   res.clearCookie('spotify_auth');
   res.redirect('/home');
 });
 
 app.get('/refresh-spotify', function(req, res) {
-  console.debug(`DEBUG - inbound request to '/refresh-spotify'`);
-
   refresh(
     req.query.refresh_token,
     app.get('spotify_client_id'),
     app.get('spotify_client_secret'),
   ).then((authdata) => {
     res.jsonp(authdata);
-  }, (err) => {
-    res.jsonp({error: 'error getting refreshed token'});
   });
 });
 
@@ -175,7 +171,6 @@ app.route('/rooms/:room_id?')
         res.jsonp({status: 'success', message: 'room already exists'});
       } else {
         rooms[req.room.id] = req.body;
-        console.debug('DEBUG - created room ' + req.room.id);
         res.jsonp({status: 'success', message: 'new room created'});
       }
     } else {
@@ -195,15 +190,13 @@ app.route('/rooms/:room_id?')
 // redirect all trafic over ssl
 app.get('/', (req, res) => res.redirect('/home'));
 app.get('/home', function(req, res) {
-  console.debug(`DEBUG - inbound request to '/home'`);
-
-  const auth = req.cookies.spotify_auth || '{}';
-  const token = JSON.parse(auth).access_token;
+  // get the auth token from the cookie
+  const {access_token, token_type} = JSON.parse(req.cookies.spotify_auth || '{}');
   const me_options = {
     hostname: 'api.spotify.com',
     path: '/v1/me',
     headers: {
-      'Authorization': 'Bearer ' + token,
+      'Authorization': token_type + ' ' + access_token,
     },
   };
 
