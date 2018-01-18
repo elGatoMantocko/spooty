@@ -1,4 +1,7 @@
 {
+  "name": "spooty",
+  "version": "0.0.1",
+  "description": "Listen to music with friends!",
   "scripts": {
     "build": "node node_modules/gulp/bin/gulp.js build",
     "lint": "node node_modules/eslint/bin/eslint src/server/*.js test/**/*.js src/assets/js/**/*.js",

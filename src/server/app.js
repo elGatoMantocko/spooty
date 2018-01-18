@@ -3,11 +3,17 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const https = require('https');
+const os = require('os');
 
 const Handlebars = require('handlebars');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const upload = require('multer')();
+
+// build version properties
+const {name: application_name, version: build_version} = require(path.join(__dirname, '..', '..', 'package.json'));
+const build_date = (new Date()).toISOString();
+const machine_name = os.hostname();
 
 const {login, refresh} = require('spotifauth');
 const app = express();
@@ -81,6 +87,10 @@ app.use(function(req, res, next) {
 
 app.use('/resources', express.static('node_modules'));
 app.use('/assets', express.static(bundleDir));
+
+app.get('/base/version', function(req, res) {
+  res.jsonp({machine_name, build_date, build_version, application_name});
+});
 
 // client side logging endpoint
 app.post('/logger/:loggerPath', upload.array(), function(req, res) {
