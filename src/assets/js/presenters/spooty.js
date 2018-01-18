@@ -1,69 +1,11 @@
 /* eslint no-console: 1 */
-SP.Presenters = SP.Presenters || {};
 SP.Presenters.Spooty = function() {
   // spotify player sdk
   window.onSpotifyWebPlaybackSDKReady = () => {
-    function setupAjax() {
-      const {token_type, access_token} = SP.globalContext.get('spotify_auth');
-      $.ajaxSetup({
-        headers: {
-          'Authorization': token_type + ' ' + access_token,
-        },
-      });
-    }
-
-    if (SP.globalContext.get('spotify_auth').access_token) {
-      setupAjax();
-
-      // change login button to log out
-      $('#login-btn')
-        .text('Logout')
-        .attr('href', '/logout-spotify')
-        .toggleClass('btn-outline-success btn-outline-info');
-    } else {
-      // stop execution if the users token is mia or invalid
-      return;
-    }
-
-    // get user info to display
-    $.getJSON('https://api.spotify.com/v1/me').then((response) => {
-      const {
-        display_name: name,
-        email,
-        product,
-        external_urls: {spotify: profilePage},
-        images: [{url: profilePicture}],
-      } = response;
-
-      $('.user-info').append(
-        Handlebars.templates['spooty/templates/user'](
-          $.extend(SP.user, {name, email, product, profilePage, profilePicture})
-        )
-      );
-    });
-
     let player = new Spotify.Player({
       name: 'Spooty',
       getOAuthToken: (cb) => cb(SP.globalContext.get('spotify_auth').access_token),
     });
-
-    window.setInterval(() => {
-      // refresh the spotify auth token every <expires_in> interval
-      const {refresh_token} = SP.globalContext.get('spotify_auth');
-      $.getJSON('/refresh-spotify', {refresh_token}).then((data) => {
-        SP.globalContext.set('spotify_auth', $.extend({}, SP.globalContext.get('spotify_auth'), data));
-        document.cookie = 'spotify_auth' + '=' + encodeURIComponent(JSON.stringify(SP.globalContext.get('spotify_auth'))) + '; expires=' + moment().add(7, 'hours').toString() + '; path=/';
-        setupAjax();
-
-        // TODO: reinitialize the player here (the following code shouldn't work)
-        player.disconnect();
-        player = new Spotify.Player({
-          name: 'Spooty',
-          getOAuthToken: (cb) => cb(data.access_token),
-        });
-        player.connect();
-      }, (e) => console.error(e));
-    }, SP.globalContext.get('spotify_auth').expires_in * 1000);
 
     // need to handle logout here to disconnect the player
     $('#login-btn').off('click').click(function(e) {
@@ -112,7 +54,6 @@ SP.Presenters.Spooty = function() {
     // Ready
     player.on('ready', (data) => {
       let {device_id} = data;
-      console.log('Ready with Device ID', device_id);
       SP.logger.info(`device_id ${device_id} registered`);
 
       function initializeEvents() {
@@ -134,6 +75,7 @@ SP.Presenters.Spooty = function() {
           .off('click').click(/* @this HTMLElement */function(e) {
             const roomData = {
               context_uri: $(this).data('value'),
+              start_time: (new Date()).toISOString(),
             };
             // begin playback
             $.ajax({

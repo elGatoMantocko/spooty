@@ -64,9 +64,20 @@ app.set('spotify_redirect_uri', SPOTIFY_REDIRECT_URI);
 
 app.set('rooms', {});
 
+// parse and add body object to request
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+// parse and add cookie object to request
 app.use(cookieParser());
+
+// application request logging
+app.use(function(req, res, next) {
+  const {originalUrl, body, method, ip, protocol} = req;
+  // time of request - request method - full path - source ip address - protocol (should always be https)
+  console.log(`INFO - ${(new Date()).toUTCString()} - ${method} - ${originalUrl} - ${ip} - ${protocol} - ${JSON.stringify(body)}`);
+  next();
+});
 
 app.use('/resources', express.static('node_modules'));
 app.use('/assets', express.static(bundleDir));
@@ -89,15 +100,8 @@ app.post('/logger/:loggerPath', upload.array(), function(req, res) {
     return;
   }
 
-  console[loggerPath](`${loggerPath.toUpperCase()} - ${(new Date()).toUTCString()} - ${page_url} - ${page_title} - ${message} - ${user_agent}`);
+  console[loggerPath](`CLIENT ${loggerPath.toUpperCase()} - ${(new Date()).toUTCString()} - ${page_url} - ${page_title} - ${message} - ${user_agent}`);
   res.send('DONE');
-});
-
-app.all('*', function(req, res, next) {
-  const {originalUrl, body, method, ip, protocol} = req;
-  // time of request - request method - full path - source ip address - protocol (should always be https)
-  console.log(`INFO - ${(new Date()).toUTCString()} - ${method} - ${originalUrl} - ${ip} - ${protocol} - ${JSON.stringify(body)}`);
-  next();
 });
 
 // generate code for the authorize endpoint
@@ -210,6 +214,7 @@ app.get('/home', function(req, res) {
       // build the app model
       let model = {
         user: {id: id},
+        Libs: {},
         Models: {},
         Presenters: {},
       };

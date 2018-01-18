@@ -4,6 +4,7 @@ const gulp = require('gulp');
 const autoprefixer = require('autoprefixer');
 const exec = require('child_process').exec;
 const plugins = require('gulp-load-plugins')();
+const {JS_FILES} = require('./buildtools/paths');
 
 // src locations
 const ASSETS_DIR = path.join('src', 'assets');
@@ -26,7 +27,7 @@ gulp.task('bundleStatic', function() {
 });
 
 gulp.task('bundleJs', function() {
-  return gulp.src(path.join(CLIENT_JS_SRC, '**', '*.js'))
+  return gulp.src(JS_FILES.map((file) => path.join(CLIENT_JS_SRC, '**', file)))
     .pipe(plugins.sourcemaps.init())
     .pipe(plugins.babel({presets: ['env']}))
     .pipe(plugins.concat('app.js'))
