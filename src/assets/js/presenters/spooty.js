@@ -73,23 +73,22 @@ SP.Presenters.Spooty = function() {
             $(e.currentTarget).addClass('highlight');
           })
           .off('click').click(/* @this HTMLElement */function(e) {
-            const roomData = {
-              context_uri: $(this).data('value'),
-              start_time: (new Date()).toISOString(),
-            };
+            const {
+              id: playlist_id,
+              owner: owner_id,
+              value: context_uri,
+            } = $(this).data();
+            const start_time = (new Date()).toISOString();
+
             // begin playback
             $.ajax({
               url: 'https://api.spotify.com/v1/me/player/play?device_id=' + device_id,
               method: 'PUT',
-              data: JSON.stringify(roomData),
+              data: JSON.stringify({context_uri}),
             }).then(() => console.log('playing ' + $(this).data('value')), (xhr, e) => SP.logger.error(e));
 
             // submit the room object
-            $.post(`/rooms/${$(this).data('id')}`, roomData).then((response) => {
-              if (response.success) {
-                $('.room-info').empty().append();
-              }
-            });
+            $.post(`/rooms/${playlist_id}`, {start_time, owner_id});
           });
       }
 
@@ -111,6 +110,7 @@ SP.Presenters.Spooty = function() {
                 display_value: item.name,
                 opt_display_value: item.owner.display_name || item.owner.id,
                 minor_details: item.tracks.total,
+                owner: item.owner.id,
               };
             });
 

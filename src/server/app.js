@@ -5,6 +5,7 @@ const express = require('express');
 const https = require('https');
 const os = require('os');
 
+const ServerSideEvents = require('express-sse');
 const Handlebars = require('handlebars');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -43,6 +44,8 @@ if (!SPOTIFY_CLIENT_ID) {
   APP_PORT = 3000;
   console.warn('WARNING - It is recommended that you provide a custom app port (must be a number > 0 and < 65536).\n... -p <PORT>');
 }
+
+const sse = new ServerSideEvents();
 
 const viewsDir = path.join('src', 'assets', 'views');
 const layoutsDir = path.join(viewsDir, 'layouts');
@@ -161,6 +164,7 @@ app.param('room_id', function(req, res, next, id) {
 });
 
 // rooms path
+app.get('/roomstream', sse.init);
 app.route('/rooms/:room_id?')
   // check if the room_id param exists
   .all(function(req, res, next) {
@@ -182,9 +186,14 @@ app.route('/rooms/:room_id?')
     if (req.room.id) {
       let rooms = app.get('rooms');
       if (rooms[req.room.id]) {
-        res.jsonp({status: 'success', message: 'room already exists'});
+        res.jsonp({status: 'noop', message: 'room already exists'});
       } else {
         rooms[req.room.id] = req.body;
+        sse.send({
+          start_time: req.body.start_time,
+          owner_id: req.body.owner_id,
+          playlist_id: req.room.id,
+        }, 'room_created');
         res.jsonp({status: 'success', message: 'new room created'});
       }
     } else {
@@ -195,6 +204,7 @@ app.route('/rooms/:room_id?')
   // delete a room
   .delete(function(req, res, next) {
     if (req.room.id) {
+      sse.send(req.room.id, 'room_deleted');
       res.send(delete app.get('rooms')[req.room.id]);
     } else {
       next(new Error('room id not passed'));
