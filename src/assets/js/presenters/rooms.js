@@ -10,13 +10,27 @@
       const {
         name,
         owner: {display_name: owner_name},
+        tracks: {items: tracks},
         uri,
       } = response;
-      SP.rooms.push({name, owner_name, uri, start_time});
+      SP.rooms.push({name, owner_name, uri, start_time, tracks});
       // TODO: possibly consider sorting the rooms here
       $('.rooms').empty().append(
         Handlebars.templates['spooty/templates/rooms']({rooms: SP.rooms})
       );
+
+      $('.room-btn').click(/* @this HTMLElement */function(e) {
+        const {contextUri, startTime} = $(this).data();
+
+        // build offset with startTime
+
+        // begin playback
+        $.ajax({
+          url: 'https://api.spotify.com/v1/me/player/play?device_id=' + SP.device_id,
+          method: 'PUT',
+          data: JSON.stringify({contextUri}),
+        }).then(() => console.log('playing ' + $(this).data('value')), (xhr, e) => SP.logger.error(e));
+  });
     });
   }
 

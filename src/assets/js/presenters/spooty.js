@@ -54,6 +54,7 @@ SP.Presenters.Spooty = function() {
     // Ready
     player.on('ready', (data) => {
       let {device_id} = data;
+      SP.device_id = device_id;
       SP.logger.info(`device_id ${device_id} registered`);
 
       function initializeEvents() {
